@@ -22,43 +22,52 @@ public class Api {
 		//keep the server running
 		while (true) {
 			
-			try (Socket client = serverSocket.accept()){
+			Socket client = serverSocket.accept();
 			client.setSoTimeout(0);
 			
-			InputStream inputStream = client.getInputStream();
-			OutputStream outputStream = client.getOutputStream();
+			new Thread(() -> {
+				try {
+				InputStream inputStream = client.getInputStream();
+				OutputStream outputStream = client.getOutputStream();
+				
+				String httpRequest = read(inputStream);
+				
+				List<String> lines = Arrays.asList(httpRequest.split("(?m)^\\s*$"));
+				
+				for (String line: lines) {
+					System.out.println("line " + line);
+				}
+				
+				System.out.println(lines.size());
+				
+				String headers = lines.get(0);
+				//System.out.println(headers);
+				String body;
+				
+				if (lines.size()>1) {
+					body = lines.get(1);
+					System.out.println(body);
+				}
+				
+				//hello world response
+				OutputStream clientOutput = client.getOutputStream();
+				clientOutput.write(("HTTP/1.1 200 OK\r\n").getBytes());
+				clientOutput.write(("\r\n").getBytes());
+				clientOutput.write(("Hello World").getBytes());
+				clientOutput.flush();
+				} catch (IOException ex) {
+					ex.printStackTrace();
+				} finally {
+					try {
+						client.close();
+					} catch (IOException e){
+						e.printStackTrace();
+					}
+				}
+			}).start();
+				
+				
 			
-			String httpRequest = read(inputStream);
-			
-			List<String> lines = Arrays.asList(httpRequest.split("(?m)^\\s*$"));
-			
-			for (String line: lines) {
-				System.out.println("line " + line);
-			}
-			
-			System.out.println(lines.size());
-			
-			String headers = lines.get(0);
-			//System.out.println(headers);
-			String body;
-			
-			if (lines.size()>1) {
-				body = lines.get(1);
-				System.out.println(body);
-			}
-			
-			//hello world response
-			OutputStream clientOutput = client.getOutputStream();
-			clientOutput.write(("HTTP/1.1 200 OK\r\n").getBytes());
-			clientOutput.write(("\r\n").getBytes());
-			clientOutput.write(("Hello World").getBytes());
-			clientOutput.flush();
-			
-			
-			
-			//close connection
-			client.close();
-			}
 			
 		}
 	}
