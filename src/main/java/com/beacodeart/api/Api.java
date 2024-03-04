@@ -22,7 +22,7 @@ public class Api {
 		//keep the server running
 		while (true) {
 			
-			Socket client = serverSocket.accept();
+			try (Socket client = serverSocket.accept()){
 			client.setSoTimeout(0);
 			
 			InputStream inputStream = client.getInputStream();
@@ -46,6 +46,20 @@ public class Api {
 				body = lines.get(1);
 				System.out.println(body);
 			}
+			
+			//hello world response
+			OutputStream clientOutput = client.getOutputStream();
+			clientOutput.write(("HTTP/1.1 200 OK\r\n").getBytes());
+			clientOutput.write(("\r\n").getBytes());
+			clientOutput.write(("Hello World").getBytes());
+			clientOutput.flush();
+			
+			
+			
+			//close connection
+			client.close();
+			}
+			
 		}
 	}
 			
