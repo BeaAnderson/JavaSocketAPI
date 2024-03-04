@@ -34,11 +34,11 @@ public class Api {
 				
 				List<String> lines = Arrays.asList(httpRequest.split("(?m)^\\s*$"));
 				
-				for (String line: lines) {
-					System.out.println("line " + line);
-				}
+				//for (String line: lines) {
+					//System.out.println("line " + line);
+				//}
 				
-				System.out.println(lines.size());
+				//System.out.println(lines.size());
 				
 				String headers = lines.get(0);
 				//System.out.println(headers);
@@ -46,7 +46,7 @@ public class Api {
 				
 				if (lines.size()>1) {
 					body = lines.get(1);
-					System.out.println(body);
+					//System.out.println(body);
 				}
 				
 				//hello world response
@@ -55,6 +55,8 @@ public class Api {
 				clientOutput.write(("\r\n").getBytes());
 				clientOutput.write(("Hello World").getBytes());
 				clientOutput.flush();
+				
+				
 				} catch (IOException ex) {
 					ex.printStackTrace();
 				} finally {
