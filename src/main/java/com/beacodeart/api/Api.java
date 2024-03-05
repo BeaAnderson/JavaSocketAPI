@@ -3,7 +3,6 @@ package com.beacodeart.api;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.reflect.Array;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
@@ -12,6 +11,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import com.beacodeart.api.Request.GetRequest;
+import com.beacodeart.api.Request.PostRequest;
 
 public class Api {
 	public static void main(String[] args) throws IOException {
@@ -38,7 +40,7 @@ public class Api {
 
 					Request parsedRequest = parseRequest(lines);
 
-					System.out.println(parsedRequest.getUrl());
+					System.out.println(parsedRequest instanceof PostRequest);
 
 					// hello world response
 					outputStream.write(("HTTP/1.1 200 OK\r\n").getBytes());
@@ -95,36 +97,16 @@ public class Api {
 			headers.put(key, value);
 		}
 
-		return new Request(method, url, headers, body);
+		switch (method) {
+			case "GET":
+				return new GetRequest(url, headers);
+			case "POST":
+				return new PostRequest(url, headers, body);
+			default:
+				break;
+		}
+
+		return null;
 	}
 
-	static class Request {
-		private String method;
-		private String url;
-		private Map<String, String> headers;
-		private String body;
-
-		public Request(String method, String url, Map<String, String> headers, String body) {
-			this.method = method;
-			this.url = url;
-			this.headers = headers;
-			this.body = body;
-		}
-
-		public String getBody() {
-			return body;
-		}
-
-		public Map<String, String> getHeaders() {
-			return headers;
-		}
-
-		public String getMethod() {
-			return method;
-		}
-
-		public String getUrl() {
-			return url;
-		}
-	}
 }
