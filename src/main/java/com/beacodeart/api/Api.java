@@ -3,6 +3,7 @@ package com.beacodeart.api;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Array;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
@@ -35,27 +36,15 @@ public class Api {
 
 					List<String> lines = Arrays.asList(httpRequest.split("(?m)^\\s*$"));
 
-					// for (String line: lines) {
-					// System.out.println("line " + line);
-					// }
+					Request parsedRequest = parseRequest(lines);
 
-					// System.out.println(lines.size());
-
-					String headers = lines.get(0);
-					// System.out.println(headers);
-					String body;
-
-					if (lines.size() > 1) {
-						body = lines.get(1);
-						// System.out.println(body);
-					}
+					System.out.println(parsedRequest.getUrl());
 
 					// hello world response
-					OutputStream clientOutput = client.getOutputStream();
-					clientOutput.write(("HTTP/1.1 200 OK\r\n").getBytes());
-					clientOutput.write(("\r\n").getBytes());
-					clientOutput.write(("Hello World").getBytes());
-					clientOutput.flush();
+					outputStream.write(("HTTP/1.1 200 OK\r\n").getBytes());
+					outputStream.write(("\r\n").getBytes());
+					outputStream.write(("Hello World").getBytes());
+					outputStream.flush();
 
 				} catch (IOException ex) {
 					ex.printStackTrace();
@@ -81,11 +70,43 @@ public class Api {
 		return result.toString();
 	}
 
+	static Request parseRequest(List<String> data) {
+		String method = null;
+		String url = null;
+		Map<String, String> headers = new HashMap<String, String>();
+		;
+		String body = null;
+
+		if (data.size() > 1) {
+			body = data.get(1);
+		}
+
+		String unparsedHeaders = data.get(0);
+		List<String> headerLines = Arrays.asList(unparsedHeaders.split("\\r?\\n|\\r"));
+
+		String line1 = headerLines.get(0);
+		method = line1.split("\\s+")[0].trim();
+		url = line1.split("\\s+")[1].trim();
+
+		for (int i = 1; i < headerLines.size(); i++) {
+			String line = headerLines.get(i);
+			String key = line.split(":")[0];
+			String value = line.split(":")[1];
+			headers.put(key, value);
+		}
+
+		return new Request(method, url, headers, body);
+	}
+
 	static class Request {
+		private String method;
+		private String url;
 		private Map<String, String> headers;
 		private String body;
 
-		public Request(Map<String, String> headers, String body) {
+		public Request(String method, String url, Map<String, String> headers, String body) {
+			this.method = method;
+			this.url = url;
 			this.headers = headers;
 			this.body = body;
 		}
@@ -96,6 +117,14 @@ public class Api {
 
 		public Map<String, String> getHeaders() {
 			return headers;
+		}
+
+		public String getMethod() {
+			return method;
+		}
+
+		public String getUrl() {
+			return url;
 		}
 	}
 }
