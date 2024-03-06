@@ -33,6 +33,7 @@ public class Api {
 				try {
 					InputStream inputStream = client.getInputStream();
 					OutputStream outputStream = client.getOutputStream();
+					RequestProcessor requestProcessor = new RequestProcessor();
 
 					String httpRequest = read(inputStream);
 
@@ -40,12 +41,8 @@ public class Api {
 
 					Request parsedRequest = parseRequest(lines);
 
-					System.out.println(parsedRequest instanceof PostRequest);
+					outputStream.write(parsedRequest.accept(requestProcessor).getBytes());
 
-					// hello world response
-					outputStream.write(("HTTP/1.1 200 OK\r\n").getBytes());
-					outputStream.write(("\r\n").getBytes());
-					outputStream.write(("Hello World").getBytes());
 					outputStream.flush();
 
 				} catch (IOException ex) {
