@@ -41,7 +41,7 @@ public class Api {
 
 					Request parsedRequest = parseRequest(lines);
 
-					outputStream.write(parsedRequest.accept(requestProcessor).getBytes());
+					outputStream.write(parsedRequest.accept(requestProcessor));
 
 					outputStream.flush();
 

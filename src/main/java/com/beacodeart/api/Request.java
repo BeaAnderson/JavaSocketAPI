@@ -7,7 +7,7 @@ abstract class Request {
     Map<String, String> headers;
 
     interface Visitor<R> {
-        R visitGetRequest();
+        R visitGetRequest(String url);
 
         R visitPostRequest();
 
@@ -26,7 +26,7 @@ abstract class Request {
 
         @Override
         <R> R accept(Visitor<R> visitor) {
-            return visitor.visitGetRequest();
+            return visitor.visitGetRequest(url);
         }
     }
 
