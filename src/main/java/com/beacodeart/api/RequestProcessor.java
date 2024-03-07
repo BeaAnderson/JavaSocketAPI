@@ -11,7 +11,7 @@ public class RequestProcessor implements Request.Visitor<byte[]> {
         // load index.html
         if (url.length() > 1) {
             try (FileInputStream htmlFile = new FileInputStream(
-                    "D:\\documents\\fdm\\vscodews\\JavaSocketAPI\\src\\main\\java\\com\\beacodeart\\api\\"
+                    "src\\main\\java\\com\\beacodeart\\api\\"
                             + url.substring(1))) {
 
                 // turn html into bytes
@@ -29,7 +29,7 @@ public class RequestProcessor implements Request.Visitor<byte[]> {
             }
         } else {
             try (FileInputStream htmlFile = new FileInputStream(
-                    "D:\\documents\\fdm\\vscodews\\JavaSocketAPI\\src\\main\\java\\com\\beacodeart\\api\\index.html")) {
+                    "src\\main\\java\\com\\beacodeart\\api\\index.html")) {
                 byte[] one = "HTTP/1.1 200 OK\r\n\r\n".getBytes();
                 byte[] two = htmlFile.readAllBytes();
                 byte[] combined = new byte[one.length + two.length];
