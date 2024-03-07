@@ -9,7 +9,7 @@ abstract class Request {
     interface Visitor<R> {
         R visitGetRequest(String url);
 
-        R visitPostRequest();
+        R visitPostRequest(String url, String body);
 
         R visitPutRequest();
 
@@ -45,7 +45,7 @@ abstract class Request {
 
         @Override
         <R> R accept(Visitor<R> visitor) {
-            return visitor.visitPostRequest();
+            return visitor.visitPostRequest(url, body);
         }
     }
 

@@ -3,6 +3,9 @@ package com.beacodeart.api;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 
 public class RequestProcessor implements Request.Visitor<byte[]> {
 
@@ -47,9 +50,14 @@ public class RequestProcessor implements Request.Visitor<byte[]> {
     }
 
     @Override
-    public byte[] visitPostRequest() {
-
-        return "HTTP/1.1 200 OK\r\n\r\nPost Request".getBytes();
+    public byte[] visitPostRequest(String url, String body) {
+        String path = "src\\main\\java\\com\\beacodeart\\api\\" + url.substring(1);
+        try{
+            Files.write(Paths.get(path), body.getBytes(), StandardOpenOption.APPEND);
+        } catch (IOException e){
+            return "HTTP/1.1 404 NOT FOUND".getBytes();
+        }
+        return "HTTP/1.1 200 OK\r\n\r\n".getBytes();
     }
 
     @Override
