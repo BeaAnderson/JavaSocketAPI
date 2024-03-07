@@ -51,7 +51,7 @@ public class RequestProcessor implements Request.Visitor<byte[]> {
 
     @Override
     public byte[] visitPostRequest(String url, String body) {
-        String path = "src\\main\\java\\com\\beacodeart\\api\\" + url.substring(1);
+        String path = "src\\main\\java\\com\\beacodeart\\api\\" + url.substring(1) + ".txt";
         try{
             Files.write(Paths.get(path), body.getBytes(), StandardOpenOption.APPEND);
         } catch (IOException e){
