@@ -14,7 +14,7 @@ public class RequestProcessor implements Request.Visitor<byte[]> {
         // load index.html
         if (url.length() > 1) {
             try (FileInputStream htmlFile = new FileInputStream(
-                    "src\\main\\java\\com\\beacodeart\\api\\"
+                    "src\\main\\resources\\"
                             + url.substring(1))) {
 
                 // turn html into bytes
@@ -32,7 +32,7 @@ public class RequestProcessor implements Request.Visitor<byte[]> {
             }
         } else {
             try (FileInputStream htmlFile = new FileInputStream(
-                    "src\\main\\java\\com\\beacodeart\\api\\index.html")) {
+                    "src\\main\\resources\\index.html")) {
                 byte[] one = "HTTP/1.1 200 OK\r\n\r\n".getBytes();
                 byte[] two = htmlFile.readAllBytes();
                 byte[] combined = new byte[one.length + two.length];
@@ -51,10 +51,10 @@ public class RequestProcessor implements Request.Visitor<byte[]> {
 
     @Override
     public byte[] visitPostRequest(String url, String body) {
-        String path = "src\\main\\java\\com\\beacodeart\\api\\" + url.substring(1) + ".txt";
-        try{
+        String path = "src\\main\\resources\\" + url.substring(1) + ".txt";
+        try {
             Files.write(Paths.get(path), body.getBytes(), StandardOpenOption.APPEND);
-        } catch (IOException e){
+        } catch (IOException e) {
             return "HTTP/1.1 404 NOT FOUND".getBytes();
         }
         return "HTTP/1.1 200 OK\r\n\r\n".getBytes();
