@@ -2,18 +2,24 @@ package com.beacodeart.api;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
 
 public class Repository {
 
-    public static String getResource() {
+    public String getResource() {
 
-        String result = "";
+        String result = "hello";
+        String query = "select first_name from consultants where consultant_id = 1";
         String password = APIConnection.getPassword();
         String url = APIConnection.getUrl();
         String username = APIConnection.getUsername();
 
         try (Connection conn = DriverManager.getConnection(url, username, password)) {
-
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(query);
+            rs.next();
+            result = rs.getString("first_name");
         } catch (Exception e) {
             e.printStackTrace();
         }

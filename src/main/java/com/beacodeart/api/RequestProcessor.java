@@ -33,8 +33,10 @@ public class RequestProcessor implements Request.Visitor<byte[]> {
         } else {
             try (FileInputStream htmlFile = new FileInputStream(
                     "src\\main\\resources\\index.html")) {
+                Repository repo = new Repository();
                 byte[] one = "HTTP/1.1 200 OK\r\n\r\n".getBytes();
-                byte[] two = htmlFile.readAllBytes();
+                String twoString = repo.getResource();
+                byte[] two = twoString.getBytes();
                 byte[] combined = new byte[one.length + two.length];
                 ByteBuffer buffer = ByteBuffer.wrap(combined);
                 buffer.put(one);
