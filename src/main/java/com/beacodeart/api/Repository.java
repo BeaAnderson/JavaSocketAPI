@@ -6,8 +6,11 @@ import java.sql.DriverManager;
 public class Repository {
 
     public static String getResource() {
-        
+
         String result = "";
+        String password = APIConnection.getPassword();
+        String url = APIConnection.getUrl();
+        String username = APIConnection.getUsername();
 
         try (Connection conn = DriverManager.getConnection(url, username, password)) {
 
