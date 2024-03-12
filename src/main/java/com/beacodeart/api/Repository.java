@@ -10,7 +10,7 @@ public class Repository {
     public String getResource() {
 
         String result = "hello";
-        String query = "select first_name from consultants where consultant_id = 1";
+        String query = "select username from users where user_id = 1";
         String password = APIConnection.getPassword();
         String url = APIConnection.getUrl();
         String username = APIConnection.getUsername();
@@ -19,7 +19,7 @@ public class Repository {
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(query);
             rs.next();
-            result = rs.getString("first_name");
+            result = rs.getString("username");
         } catch (Exception e) {
             e.printStackTrace();
         }
