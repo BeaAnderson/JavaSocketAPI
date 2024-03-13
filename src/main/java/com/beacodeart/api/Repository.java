@@ -10,7 +10,7 @@ public class Repository {
     public String getResource() {
 
         String result = "hello";
-        String query = "select username from users where user_id = 1";
+        String query = "select username from users where user_id = 2";
         String password = APIConnection.getPassword();
         String url = APIConnection.getUrl();
         String username = APIConnection.getUsername();
