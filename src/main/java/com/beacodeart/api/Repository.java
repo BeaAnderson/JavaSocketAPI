@@ -10,9 +10,9 @@ public class Repository {
     public String getResource() {
 
         String result = "hello";
-        String query = "select username from users where user_id = 2";
+        String query = "select username from users where user_id = 1";
         String password = APIConnection.getPassword();
-        String url = APIConnection.getUrl();
+        String url = APIConnection.getUrlStart() + "testdb" + APIConnection.getUrlEnd();
         String username = APIConnection.getUsername();
 
         try (Connection conn = DriverManager.getConnection(url, username, password)) {
@@ -21,7 +21,7 @@ public class Repository {
             rs.next();
             result = rs.getString("username");
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
 
         return result;

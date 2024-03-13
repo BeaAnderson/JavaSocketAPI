@@ -44,7 +44,7 @@ public class Api {
 					outputStream.flush();
 
 				} catch (IOException ex) {
-					ex.printStackTrace();
+					System.out.println(ex.getMessage());
 				} finally {
 					try {
 						client.close();

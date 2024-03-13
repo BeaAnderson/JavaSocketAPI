@@ -52,8 +52,8 @@ COLLATE = utf8mb4_0900_ai_ci;
 
 -- insert statements
 INSERT INTO users (user_id, username) VALUES (1, 'user1');
-INSERT INTO users (user_id, username) VALUES (2, 'user1');
-INSERT INTO users (user_id, username) VALUES (3, 'user1');
+INSERT INTO users (user_id, username) VALUES (2, 'user2');
+INSERT INTO users (user_id, username) VALUES (3, 'user3');
 
 INSERT INTO blogs (blog_id, title, user_id) VALUES (1, 'blog1', 1);
 INSERT INTO blogs (blog_id, title, user_id) VALUES (2, 'blog2', 2);
