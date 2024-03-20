@@ -44,7 +44,7 @@ public class Api {
 					outputStream.flush();
 
 				} catch (IOException ex) {
-					System.out.println(ex.getMessage());
+					ex.printStackTrace();
 				} finally {
 					try {
 						client.close();
@@ -71,7 +71,6 @@ public class Api {
 		String method = null;
 		String url = null;
 		Map<String, String> headers = new HashMap<String, String>();
-		;
 		String body = null;
 
 		if (data.size() > 1) {

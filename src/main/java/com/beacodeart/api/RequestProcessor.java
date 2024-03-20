@@ -6,6 +6,7 @@ import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.List;
 
 public class RequestProcessor implements Request.Visitor<byte[]> {
 
@@ -31,19 +32,33 @@ public class RequestProcessor implements Request.Visitor<byte[]> {
                 return "HTTP/1.1 404 NOT FOUND".getBytes();
             }
         } else {
-            try (FileInputStream htmlFile = new FileInputStream(
-                    "src\\main\\resources\\index.html")) {
+            try {
                 Repository repo = new Repository();
-                byte[] one = "HTTP/1.1 200 OK\r\n\r\n".getBytes();
-                String twoString = repo.getResource();
-                byte[] two = twoString.getBytes();
-                byte[] combined = new byte[one.length + two.length];
+                byte[] oneBytes = "HTTP/1.1 200 OK\r\n\r\n".getBytes();
+                List<String> twoListOfStrings = repo.getResource();
+
+                String two = "[";
+
+                int i=0;
+                while (i<twoListOfStrings.size()-1){
+                    two += twoListOfStrings.get(i);
+                    two += ",";
+                    i++;
+                }
+
+                two += twoListOfStrings.get(i);
+
+
+                two += "]";
+
+                byte[] twoBytes = two.getBytes();
+                byte[] combined = new byte[oneBytes.length + twoBytes.length];
                 ByteBuffer buffer = ByteBuffer.wrap(combined);
-                buffer.put(one);
-                buffer.put(two);
+                buffer.put(oneBytes);
+                buffer.put(twoBytes);
                 combined = buffer.array();
                 return combined;
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.getMessage();
             }
         }
