@@ -34,8 +34,12 @@ public class RequestProcessor implements Request.Visitor<byte[]> {
         } else {
             try {
                 Repository repo = new Repository();
-                byte[] oneBytes = "HTTP/1.1 200 OK\r\n\r\n".getBytes();
+                String line1 = "HTTP/1.1 200 OK\r\n";
+                
                 List<String> twoListOfStrings = repo.getResource();
+
+                String contentlength = "Content-length: ";
+                String contenttype = "Content-type: application/json \r\n\r\n";
 
                 String two = "[";
 
@@ -50,8 +54,11 @@ public class RequestProcessor implements Request.Visitor<byte[]> {
 
 
                 two += "]";
-
                 byte[] twoBytes = two.getBytes();
+                contentlength += (Integer.toString(twoBytes.length) + "\r\n");
+                String headers = line1 + contentlength + contenttype;
+                byte[] oneBytes = headers.getBytes();
+                
                 byte[] combined = new byte[oneBytes.length + twoBytes.length];
                 ByteBuffer buffer = ByteBuffer.wrap(combined);
                 buffer.put(oneBytes);
