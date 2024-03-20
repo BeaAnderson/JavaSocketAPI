@@ -6,6 +6,7 @@ import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
 import java.util.List;
 
 public class RequestProcessor implements Request.Visitor<byte[]> {
@@ -13,30 +14,28 @@ public class RequestProcessor implements Request.Visitor<byte[]> {
     @Override
     public byte[] visitGetRequest(String url) {
         // load index.html
-        if (url.length() > 1) {
-            try (FileInputStream htmlFile = new FileInputStream(
-                    "src\\main\\resources\\"
-                            + url.substring(1))) {
-
-                // turn html into bytes
-                // set content type
-                byte[] one = "HTTP/1.1 200 OK\r\n\r\n".getBytes();
-                byte[] two = htmlFile.readAllBytes();
-                byte[] combined = new byte[one.length + two.length];
-                ByteBuffer buffer = ByteBuffer.wrap(combined);
-                buffer.put(one);
-                buffer.put(two);
-                combined = buffer.array();
-                return combined;
-            } catch (IOException e) {
+        if (url.length() <= 1) {
+            try {
+                String line1 = "HTTP/1.1 200 OK\r\n\r\nHello world";
+                return line1.getBytes();
+                
+            } catch (Exception e) {
                 return "HTTP/1.1 404 NOT FOUND".getBytes();
             }
         } else {
             try {
-                Repository repo = new Repository();
-                String line1 = "HTTP/1.1 200 OK\r\n";
+                List<String> twoListOfStrings = new ArrayList<String>();
+                switch (url.split("/")[1]) {
+                    case "users":
+                        twoListOfStrings = getUsers(url);
+                        break;
                 
-                List<String> twoListOfStrings = repo.getResource();
+                    default:
+                        twoListOfStrings.add("HELLO");
+                        break;
+                }
+                
+                String line1 = "HTTP/1.1 200 OK\r\n";
 
                 String contentlength = "Content-length: ";
                 String contenttype = "Content-type: application/json \r\n\r\n";
@@ -71,6 +70,11 @@ public class RequestProcessor implements Request.Visitor<byte[]> {
         }
 
         return "HTTP/1.1 404 NOT FOUND".getBytes();
+    }
+
+    private List<String> getUsers(String url) {
+        UserRepository userRepository = new UserRepository();
+        return userRepository.getResource(url);
     }
 
     @Override
