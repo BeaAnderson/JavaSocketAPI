@@ -12,15 +12,13 @@ import com.beacodeart.api.models.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class UserRepository {
+    String password = APIConnection.getPassword();
+    String url = APIConnection.getUrlStart() + "testdb" + APIConnection.getUrlEnd();
+    String username = APIConnection.getUsername();
 
     public List<String> getResource(String givenUrl) {
         String query = "select * from users";
         String[] spliturl = givenUrl.split("/");
-        System.out.println(spliturl.length);
-        
-        String password = APIConnection.getPassword();
-        String url = APIConnection.getUrlStart() + "testdb" + APIConnection.getUrlEnd();
-        String username = APIConnection.getUsername();
 
         try (Connection conn = DriverManager.getConnection(url, username, password)) {
             
@@ -59,12 +57,9 @@ public class UserRepository {
                     users.add(userAsString);
                 }
             
-            
                 return users;
 
             }
-            
-            
             
         } catch (Exception e) {
             e.printStackTrace();
@@ -72,4 +67,19 @@ public class UserRepository {
 
         return null;
     }
+
+    public String postResource(User user){
+        
+        try (Connection conn = DriverManager.getConnection(url, username, password)){
+            String query = "INSERT INTO users ( username ) VALUES ( ? )";
+            PreparedStatement stmt = conn.prepareStatement(query);
+            stmt.setString(1, user.getUsername());
+            stmt.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        };
+
+        return "success";
+    }
+
 }

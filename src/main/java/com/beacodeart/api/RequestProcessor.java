@@ -1,6 +1,5 @@
 package com.beacodeart.api;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
@@ -8,6 +7,10 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.beacodeart.api.models.User;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class RequestProcessor implements Request.Visitor<byte[]> {
 
@@ -79,13 +82,30 @@ public class RequestProcessor implements Request.Visitor<byte[]> {
 
     @Override
     public byte[] visitPostRequest(String url, String body) {
-        String path = "src\\main\\resources\\" + url.substring(1) + ".txt";
-        try {
-            Files.write(Paths.get(path), body.getBytes(), StandardOpenOption.APPEND);
-        } catch (IOException e) {
-            return "HTTP/1.1 404 NOT FOUND".getBytes();
+        switch (url.substring(1)) {
+            case "users":
+                postUser(body);
+                break;
+        
+            default:
+                break;
         }
-        return "HTTP/1.1 200 OK\r\n\r\n".getBytes();
+        
+        return "HTTP/1.1 200 OK\r\n\r\nHello".getBytes();
+    }
+
+    private String postUser(String body){
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            User user1 = mapper.readValue(body, User.class);
+            UserRepository userRepository = new UserRepository();
+            return userRepository.postResource(user1);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        
+        return null;
+        
     }
 
     @Override
