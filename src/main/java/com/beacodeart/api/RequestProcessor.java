@@ -1,10 +1,6 @@
 package com.beacodeart.api;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,6 +10,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class RequestProcessor implements Request.Visitor<byte[]> {
 
+    UserRepository userRepository;
+
+    public RequestProcessor(UserRepository userRepository) {
+        super();
+        this.userRepository = userRepository;
+    }
+    
     @Override
     public byte[] visitGetRequest(String url) {
         // load index.html
@@ -28,6 +31,7 @@ public class RequestProcessor implements Request.Visitor<byte[]> {
         } else {
             try {
                 List<String> twoListOfStrings = new ArrayList<String>();
+                
                 switch (url.split("/")[1]) {
                     case "users":
                         twoListOfStrings = getUsers(url);
@@ -76,7 +80,6 @@ public class RequestProcessor implements Request.Visitor<byte[]> {
     }
 
     private List<String> getUsers(String url) {
-        UserRepository userRepository = new UserRepository();
         return userRepository.getResource(url);
     }
 
@@ -98,7 +101,6 @@ public class RequestProcessor implements Request.Visitor<byte[]> {
         ObjectMapper mapper = new ObjectMapper();
         try {
             User user1 = mapper.readValue(body, User.class);
-            UserRepository userRepository = new UserRepository();
             return userRepository.postResource(user1);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
