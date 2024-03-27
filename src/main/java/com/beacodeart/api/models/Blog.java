@@ -15,6 +15,15 @@ public class Blog {
         this.replies = replies;
     }
 
+    public Blog(String title) {
+        super();
+        this.title =  title;
+    }
+
+    public Blog() {
+        super();
+    }
+
     public int getBlog_id() {
         return blog_id;
     }
