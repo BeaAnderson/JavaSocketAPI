@@ -36,4 +36,12 @@ public class Blog {
     public List<Reply> getReplies() {
         return replies;
     }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public void setBlog_id(int blog_id) {
+        this.blog_id = blog_id;
+    }
 }

@@ -6,8 +6,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+import com.beacodeart.api.models.Blog;
 import com.beacodeart.api.models.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -23,7 +25,7 @@ public class UserRepository {
         try (Connection conn = DriverManager.getConnection(url, username, password)) {
             
             if (spliturl.length == 2){
-                query = "select * from users";
+                query = "select * from users u inner join blogs b on u.user_id = b.user_id";
                 ObjectMapper objectMapper = new ObjectMapper();
                 Statement stmt = conn.createStatement();
                 ResultSet rs = stmt.executeQuery(query);
@@ -33,6 +35,10 @@ public class UserRepository {
                     User user1 = new User();
                     user1.setUser_id(rs.getInt(1));
                     user1.setUsername(rs.getString(2));
+                    Blog blog1 = new Blog();
+                    blog1.setBlog_id(rs.getInt(3));
+                    blog1.setTitle(rs.getString(4));
+                    user1.setBlogs(Arrays.asList(blog1));
                     String userAsString = objectMapper.writeValueAsString(user1);
                     users.add(userAsString);
                 }
