@@ -11,10 +11,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class RequestProcessor implements Request.Visitor<byte[]> {
 
     UserRepository userRepository;
+    ObjectMapper mapper;
 
-    public RequestProcessor(UserRepository userRepository) {
+    public RequestProcessor(UserRepository userRepository, ObjectMapper mapper) {
         super();
         this.userRepository = userRepository;
+        this.mapper = mapper;
     }
     
     @Override
@@ -98,7 +100,6 @@ public class RequestProcessor implements Request.Visitor<byte[]> {
     }
 
     private String postUser(String body){
-        ObjectMapper mapper = new ObjectMapper();
         try {
             User user1 = mapper.readValue(body, User.class);
             return userRepository.postResource(user1);

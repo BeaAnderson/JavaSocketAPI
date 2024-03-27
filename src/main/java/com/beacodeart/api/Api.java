@@ -12,6 +12,7 @@ import java.util.Map;
 
 import com.beacodeart.api.Request.GetRequest;
 import com.beacodeart.api.Request.PostRequest;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class Api {
 	public static void main(String[] args) throws IOException {
@@ -31,7 +32,11 @@ public class Api {
 				try {
 					InputStream inputStream = client.getInputStream();
 					OutputStream outputStream = client.getOutputStream();
-					RequestProcessor requestProcessor = new RequestProcessor(new UserRepository());
+					
+					RequestProcessor requestProcessor = new RequestProcessor(
+						new UserRepository(), 
+						new ObjectMapper()
+					);
 
 					String httpRequest = read(inputStream);
 
