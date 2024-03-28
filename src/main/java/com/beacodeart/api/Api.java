@@ -14,6 +14,7 @@ import com.beacodeart.api.Request.GetRequest;
 import com.beacodeart.api.Request.PostRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+//impliment singleton for repositoriers?
 public class Api {
 	public static void main(String[] args) throws IOException {
 		// start the server

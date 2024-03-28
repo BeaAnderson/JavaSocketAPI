@@ -8,6 +8,8 @@ import com.beacodeart.api.models.User;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+
+//impliment singleton for repositoriers?
 public class RequestProcessor implements Request.Visitor<byte[]> {
 
     UserRepository userRepository;
