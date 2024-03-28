@@ -7,6 +7,7 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 import com.beacodeart.api.DTOs.UserBlogDTO;
@@ -52,12 +53,16 @@ public class UserRepository {
                 List<String> users = new ArrayList<>();
                 
                 UserDTO user1 = new UserDTO();
+                HashSet<Integer> userBlogs = new HashSet<>();
 
                 while (rs.next()){
                     if (rs.getInt(1) == user1.getId()){
                         
-                        if (rs.getInt(3)!=0){
+                        int optBlogId = rs.getInt(3);
+
+                        if (optBlogId!=0 && !userBlogs.contains(optBlogId)){
                             UserBlogDTO blog1 = new UserBlogDTO();
+                            userBlogs.add(optBlogId);
                             blog1.setId(rs.getInt(3));
                             blog1.setTitle(rs.getString(4));
                             if (user1.getBlogs() == null){
@@ -70,6 +75,10 @@ public class UserRepository {
                             UserReplyDTO reply1 = new UserReplyDTO();
                             reply1.setId(rs.getInt(5));
                             reply1.setTitle(rs.getString(6));
+                            UserBlogDTO blog2 = new UserBlogDTO();
+                            blog2.setId(rs.getInt(7));
+                            blog2.setTitle(rs.getString(8));
+                            reply1.setBlogDTO(blog2);
                             if (user1.getReplies()==null){
                                 user1.setReplies(new ArrayList<UserReplyDTO>());
                             }
@@ -86,10 +95,13 @@ public class UserRepository {
                         
                         user1.setId(rs.getInt(1));
                         user1.setUsername(rs.getString(2));
+
+                        int optBlogId = rs.getInt(3);
                         
-                        if (rs.getInt(3)!=0){
+                        if (optBlogId!=0){
                             UserBlogDTO blog1 = new UserBlogDTO();
-                            blog1.setId(rs.getInt(3));
+                            blog1.setId(optBlogId);
+                            userBlogs.add(optBlogId);
                             blog1.setTitle(rs.getString(4));
                             if (user1.getBlogs() == null){
                                 user1.setBlogs(new ArrayList<UserBlogDTO>());
@@ -100,6 +112,10 @@ public class UserRepository {
                             UserReplyDTO reply1 = new UserReplyDTO();
                             reply1.setId(rs.getInt(5));
                             reply1.setTitle(rs.getString(6));
+                            UserBlogDTO blog2 = new UserBlogDTO();
+                            blog2.setId(rs.getInt(7));
+                            blog2.setTitle(rs.getString(8));
+                            reply1.setBlogDTO(blog2);
                             if (user1.getReplies()==null){
                                 user1.setReplies(new ArrayList<UserReplyDTO>());
                             }
