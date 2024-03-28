@@ -6,14 +6,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
 import com.beacodeart.api.DTOs.UserBlogDTO;
 import com.beacodeart.api.DTOs.UserDTO;
 import com.beacodeart.api.DTOs.UserReplyDTO;
-import com.beacodeart.api.models.Blog;
 import com.beacodeart.api.models.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
