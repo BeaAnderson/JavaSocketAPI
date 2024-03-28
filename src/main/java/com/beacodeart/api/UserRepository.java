@@ -37,11 +37,11 @@ public class UserRepository {
                         "\tr.blog_id as 'reply_blog',\n" + //
                         "    v.title as 'reply_blog_title'\n" + //
                         "from users u \n" + //
-                        "\tinner join blogs b \n" + //
+                        "\tleft join blogs b \n" + //
                         "\t\ton u.user_id = b.user_id \n" + //
-                        "    inner join replies r \n" + //
+                        "    left join replies r \n" + //
                         "\t\ton u.user_id = r.user_id\n" + //
-                        "\tinner join (\n" + //
+                        "\tleft join (\n" + //
                         "    select title, blog_id\n" + //
                         "    from blogs\n" + //
                         "    ) v\n" + //
@@ -51,21 +51,62 @@ public class UserRepository {
                 ResultSet rs = stmt.executeQuery(query);
                 List<String> users = new ArrayList<>();
                 
-                
+                UserDTO user1 = new UserDTO();
 
                 while (rs.next()){
-                    UserDTO user1 = new UserDTO();
-                    user1.setId(rs.getInt(1));
-                    user1.setUsername(rs.getString(2));
-                    UserBlogDTO blog1 = new UserBlogDTO();
-                    blog1.setId(rs.getInt(3));
-                    blog1.setTitle(rs.getString(4));
-                    UserReplyDTO reply1 = new UserReplyDTO();
-                    reply1.setId(rs.getInt(5));
-                    reply1.setTitle(rs.getString(6));
-                    user1.setBlogs(Arrays.asList(blog1));
-                    String userAsString = objectMapper.writeValueAsString(user1);
-                    users.add(userAsString);
+                    if (rs.getInt(1) == user1.getId()){
+                        
+                        if (rs.getInt(3)!=0){
+                            UserBlogDTO blog1 = new UserBlogDTO();
+                            blog1.setId(rs.getInt(3));
+                            blog1.setTitle(rs.getString(4));
+                            if (user1.getBlogs() == null){
+                                user1.setBlogs(new ArrayList<UserBlogDTO>());
+                            }
+                            user1.addBlog(blog1);
+                        }
+                        
+                        if (rs.getInt(5)!=0){
+                            UserReplyDTO reply1 = new UserReplyDTO();
+                            reply1.setId(rs.getInt(5));
+                            reply1.setTitle(rs.getString(6));
+                            if (user1.getReplies()==null){
+                                user1.setReplies(new ArrayList<UserReplyDTO>());
+                            }
+                            user1.addReply(reply1);
+                        }
+                    
+                    } else {
+                        
+                        if (user1 != null && user1.getId() != 0){
+                            String userAsString = objectMapper.writeValueAsString(user1);
+                            users.add(userAsString);
+                            user1 = new UserDTO();
+                        }
+                        
+                        user1.setId(rs.getInt(1));
+                        user1.setUsername(rs.getString(2));
+                        
+                        if (rs.getInt(3)!=0){
+                            UserBlogDTO blog1 = new UserBlogDTO();
+                            blog1.setId(rs.getInt(3));
+                            blog1.setTitle(rs.getString(4));
+                            if (user1.getBlogs() == null){
+                                user1.setBlogs(new ArrayList<UserBlogDTO>());
+                            }
+                            user1.addBlog(blog1);
+                        }
+                        if (rs.getInt(5)!=0){
+                            UserReplyDTO reply1 = new UserReplyDTO();
+                            reply1.setId(rs.getInt(5));
+                            reply1.setTitle(rs.getString(6));
+                            if (user1.getReplies()==null){
+                                user1.setReplies(new ArrayList<UserReplyDTO>());
+                            }
+                            user1.addReply(reply1);
+                        }
+                        
+                    }
                 }
             
             return users;
