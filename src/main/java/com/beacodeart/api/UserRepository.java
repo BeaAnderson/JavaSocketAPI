@@ -20,19 +20,23 @@ public class UserRepository {
     String url = APIConnection.getUrlStart() + "testdb" + APIConnection.getUrlEnd();
     String username = APIConnection.getUsername();
     String query;
+    ObjectMapper objectMapper = new ObjectMapper();
 
     public List<String> getResource(String givenUrl) {
 
         String[] spliturl = givenUrl.split("/");
         System.out.println(url);
+        
+        //get the connection
         try (Connection conn = DriverManager.getConnection(url, username, password)) {
+            
+            //if the split url array is size two the request we are dealing with is /users
             if (spliturl.length == 2) {
                 query = getAllQuery();
-                ObjectMapper objectMapper = new ObjectMapper();
+                
                 Statement stmt = conn.createStatement();
                 ResultSet rs = stmt.executeQuery(query);
                 List<String> users = new ArrayList<>();
-
                 UserDTO user1 = new UserDTO();
                 HashSet<Integer> userBlogs = new HashSet<>();
 
@@ -44,7 +48,7 @@ public class UserRepository {
                         if (optBlogId != 0 && !userBlogs.contains(optBlogId)) {
                             UserBlogDTO blog1 = new UserBlogDTO();
                             userBlogs.add(optBlogId);
-                            blog1.setId(rs.getInt(3));
+                            blog1.setId(optBlogId);
                             blog1.setTitle(rs.getString(4));
                             if (user1.getBlogs() == null) {
                                 user1.setBlogs(new ArrayList<UserBlogDTO>());
@@ -108,10 +112,10 @@ public class UserRepository {
 
                 return users;
 
+            // if the split url is 4 we are dealing with a request that looks like /user/id/{x}
             } else if (spliturl.length == 4) {
 
                 query = "select * from users where " + spliturl[2] + " = ?";
-                ObjectMapper objectMapper = new ObjectMapper();
                 PreparedStatement stmt = conn.prepareStatement(query);
                 stmt.setString(1, spliturl[3]);
                 System.out.println(stmt);
