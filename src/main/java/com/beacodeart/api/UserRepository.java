@@ -26,14 +26,14 @@ public class UserRepository {
 
         String[] spliturl = givenUrl.split("/");
         System.out.println(url);
-        
-        //get the connection
+
+        // get the connection
         try (Connection conn = DriverManager.getConnection(url, username, password)) {
-            
-            //if the split url array is size two the request we are dealing with is /users
+
+            // if the split url array is size two the request we are dealing with is /users
             if (spliturl.length == 2) {
                 query = getAllQuery();
-                
+
                 Statement stmt = conn.createStatement();
                 ResultSet rs = stmt.executeQuery(query);
                 List<String> users = new ArrayList<>();
@@ -110,9 +110,15 @@ public class UserRepository {
                     }
                 }
 
+                if (user1 != null) {
+                    String userAsString = objectMapper.writeValueAsString(user1);
+                    users.add(userAsString);
+                }
+
                 return users;
 
-            // if the split url is 4 we are dealing with a request that looks like /user/id/{x}
+                // if the split url is 4 we are dealing with a request that looks like
+                // /user/id/{x}
             } else if (spliturl.length == 4) {
 
                 query = "select * from users where " + spliturl[2] + " = ?";
