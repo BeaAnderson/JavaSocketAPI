@@ -33,11 +33,9 @@ public class Api {
 				try {
 					InputStream inputStream = client.getInputStream();
 					OutputStream outputStream = client.getOutputStream();
-					
+
 					RequestProcessor requestProcessor = new RequestProcessor(
-						new UserRepository(), 
-						new ObjectMapper()
-					);
+							new ObjectMapper());
 
 					String httpRequest = read(inputStream);
 
