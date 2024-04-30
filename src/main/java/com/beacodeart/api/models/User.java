@@ -5,6 +5,7 @@ import java.util.List;
 public class User {
     private int user_id;
     private String username;
+    private String password;
     private List<Blog> blogs;
     private List<Reply> replies;
 
@@ -12,9 +13,10 @@ public class User {
         super();
     }
 
-    public User(String username) {
+    public User(String username, String password) {
         super();
         this.username = username;
+        this.password = password;
     }
 
     public int getUser_id() {
@@ -49,180 +51,11 @@ public class User {
         this.username = username;
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
 }

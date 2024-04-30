@@ -56,13 +56,13 @@ public class UserRepository {
                             user1.addBlog(blog1);
                         }
 
-                        if (rs.getInt(5) != 0) {
+                        if (rs.getInt(6) != 0) {
                             UserReplyDTO reply1 = new UserReplyDTO();
-                            reply1.setId(rs.getInt(5));
-                            reply1.setTitle(rs.getString(6));
+                            reply1.setId(rs.getInt(6));
+                            reply1.setTitle(rs.getString(7));
                             UserBlogDTO blog2 = new UserBlogDTO();
-                            blog2.setId(rs.getInt(7));
-                            blog2.setTitle(rs.getString(8));
+                            blog2.setId(rs.getInt(8));
+                            blog2.setTitle(rs.getString(9));
                             reply1.setBlogDTO(blog2);
                             if (user1.getReplies() == null) {
                                 user1.setReplies(new ArrayList<UserReplyDTO>());
@@ -80,26 +80,27 @@ public class UserRepository {
 
                         user1.setId(rs.getInt(1));
                         user1.setUsername(rs.getString(2));
+                        user1.setPassword(rs.getString(3));
 
-                        int optBlogId = rs.getInt(3);
+                        int optBlogId = rs.getInt(4);
 
                         if (optBlogId != 0) {
                             UserBlogDTO blog1 = new UserBlogDTO();
                             blog1.setId(optBlogId);
                             userBlogs.add(optBlogId);
-                            blog1.setTitle(rs.getString(4));
+                            blog1.setTitle(rs.getString(5));
                             if (user1.getBlogs() == null) {
                                 user1.setBlogs(new ArrayList<UserBlogDTO>());
                             }
                             user1.addBlog(blog1);
                         }
-                        if (rs.getInt(5) != 0) {
+                        if (rs.getInt(6) != 0) {
                             UserReplyDTO reply1 = new UserReplyDTO();
-                            reply1.setId(rs.getInt(5));
-                            reply1.setTitle(rs.getString(6));
+                            reply1.setId(rs.getInt(6));
+                            reply1.setTitle(rs.getString(7));
                             UserBlogDTO blog2 = new UserBlogDTO();
-                            blog2.setId(rs.getInt(7));
-                            blog2.setTitle(rs.getString(8));
+                            blog2.setId(rs.getInt(8));
+                            blog2.setTitle(rs.getString(9));
                             reply1.setBlogDTO(blog2);
                             if (user1.getReplies() == null) {
                                 user1.setReplies(new ArrayList<UserReplyDTO>());
@@ -150,9 +151,10 @@ public class UserRepository {
     public static String postResource(User user) {
 
         try (Connection conn = DriverManager.getConnection(url, username, password)) {
-            String query = "INSERT INTO users ( username ) VALUES ( ? )";
+            String query = "INSERT INTO users ( username, password ) VALUES ( ?, ? )";
             PreparedStatement stmt = conn.prepareStatement(query);
             stmt.setString(1, user.getUsername());
+            stmt.setString(2, user.getPassword());
             stmt.executeUpdate();
         } catch (Exception e) {
             e.printStackTrace();
@@ -165,6 +167,7 @@ public class UserRepository {
     private static String getAllQuery() {
         return "select u.user_id, \n" + //
                 "\tu.username, \n" + //
+                "\tu.password, \n" + //
                 "\tb.blog_id, \n" + //
                 "\tb.title, \n" + //
                 "\tr.reply_id, \n" + //

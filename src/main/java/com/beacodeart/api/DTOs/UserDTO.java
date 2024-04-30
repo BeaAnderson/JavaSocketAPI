@@ -6,6 +6,7 @@ import java.util.List;
 public class UserDTO {
     private int id;
     private String username;
+    private String password;
     private ArrayList<UserBlogDTO> blogs;
     private ArrayList<UserReplyDTO> replies;
 
@@ -38,5 +39,11 @@ public class UserDTO {
     }
     public void addReply(UserReplyDTO reply) {
         this.replies.add(reply);
+    }
+    public String getPassword() {
+        return password;
+    }
+    public void setPassword(String password) {
+        this.password = password;
     }
 }
