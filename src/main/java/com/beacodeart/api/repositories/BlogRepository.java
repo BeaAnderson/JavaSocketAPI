@@ -23,6 +23,7 @@ public class BlogRepository {
     static String username = APIConnection.getUsername();
     static ObjectMapper objectMapper = new ObjectMapper();
 
+    //TODO get specific resource
     public static List<String> getResource(String givenUrl) {
         String[] spliturl = givenUrl.split("/");
 

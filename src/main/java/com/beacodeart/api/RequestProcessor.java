@@ -43,6 +43,8 @@ public class RequestProcessor implements Request.Visitor<byte[]> {
                     case "blogs":
                         twoListOfStrings = getBlogs(url);
                         break;
+                    case "replies":
+                        twoListOfStrings = getReplies(url);
                     default:
                         twoListOfStrings.add("HELLO");
                         break;
@@ -84,6 +86,11 @@ public class RequestProcessor implements Request.Visitor<byte[]> {
         return "HTTP/1.1 404 NOT FOUND".getBytes();
     }
 
+    private List<String> getReplies(String url) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getReplies'");
+    }
+
     private List<String> getUsers(String url) {
         return UserRepository.getResource(url);
     }
@@ -101,11 +108,18 @@ public class RequestProcessor implements Request.Visitor<byte[]> {
             case "blogs":
                 postBlog(body);
                 break;
+            case "replies":
+                postReply(body);
             default:
                 break;
         }
 
         return "HTTP/1.1 200 OK\r\n\r\nHello".getBytes();
+    }
+
+    private String postReply(String body) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'postReply'");
     }
 
     private String postBlog(String body) {
