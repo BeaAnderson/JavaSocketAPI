@@ -58,6 +58,8 @@ public class RequestProcessor implements Request.Visitor<byte[]> {
                 String contentlength = "Content-length: ";
                 String contenttype = "Content-type: application/json \r\n\r\n";
 
+
+                //see if this can be done using object mapper
                 String two = "[";
 
                 int i = 0;
