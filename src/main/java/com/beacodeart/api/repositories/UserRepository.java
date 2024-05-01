@@ -1,17 +1,19 @@
-package com.beacodeart.api;
+package com.beacodeart.api.repositories;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
-import com.beacodeart.api.DTOs.UserBlogDTO;
-import com.beacodeart.api.DTOs.UserDTO;
-import com.beacodeart.api.DTOs.UserReplyDTO;
+import com.beacodeart.api.APIConnection;
+import com.beacodeart.api.dto.UserBlogDTO;
+import com.beacodeart.api.dto.UserDTO;
+import com.beacodeart.api.dto.UserReplyDTO;
 import com.beacodeart.api.models.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -46,28 +48,11 @@ public class UserRepository {
                         int optBlogId = rs.getInt(3);
 
                         if (optBlogId != 0 && !userBlogs.contains(optBlogId)) {
-                            UserBlogDTO blog1 = new UserBlogDTO();
-                            userBlogs.add(optBlogId);
-                            blog1.setId(optBlogId);
-                            blog1.setTitle(rs.getString(4));
-                            if (user1.getBlogs() == null) {
-                                user1.setBlogs(new ArrayList<UserBlogDTO>());
-                            }
-                            user1.addBlog(blog1);
+                            addBlogToUser(user1, rs, userBlogs, optBlogId);
                         }
 
                         if (rs.getInt(6) != 0) {
-                            UserReplyDTO reply1 = new UserReplyDTO();
-                            reply1.setId(rs.getInt(6));
-                            reply1.setTitle(rs.getString(7));
-                            UserBlogDTO blog2 = new UserBlogDTO();
-                            blog2.setId(rs.getInt(8));
-                            blog2.setTitle(rs.getString(9));
-                            reply1.setBlogDTO(blog2);
-                            if (user1.getReplies() == null) {
-                                user1.setReplies(new ArrayList<UserReplyDTO>());
-                            }
-                            user1.addReply(reply1);
+                            addReplyToUser(user1, rs);
                         }
 
                     } else {
@@ -85,27 +70,10 @@ public class UserRepository {
                         int optBlogId = rs.getInt(4);
 
                         if (optBlogId != 0) {
-                            UserBlogDTO blog1 = new UserBlogDTO();
-                            blog1.setId(optBlogId);
-                            userBlogs.add(optBlogId);
-                            blog1.setTitle(rs.getString(5));
-                            if (user1.getBlogs() == null) {
-                                user1.setBlogs(new ArrayList<UserBlogDTO>());
-                            }
-                            user1.addBlog(blog1);
+                            addBlogToUser(user1, rs, userBlogs, optBlogId);
                         }
                         if (rs.getInt(6) != 0) {
-                            UserReplyDTO reply1 = new UserReplyDTO();
-                            reply1.setId(rs.getInt(6));
-                            reply1.setTitle(rs.getString(7));
-                            UserBlogDTO blog2 = new UserBlogDTO();
-                            blog2.setId(rs.getInt(8));
-                            blog2.setTitle(rs.getString(9));
-                            reply1.setBlogDTO(blog2);
-                            if (user1.getReplies() == null) {
-                                user1.setReplies(new ArrayList<UserReplyDTO>());
-                            }
-                            user1.addReply(reply1);
+                            addReplyToUser(user1, rs);
                         }
 
                     }
@@ -115,6 +83,9 @@ public class UserRepository {
                     String userAsString = objectMapper.writeValueAsString(user1);
                     users.add(userAsString);
                 }
+
+                rs.close();
+                stmt.close();
 
                 return users;
 
@@ -136,6 +107,9 @@ public class UserRepository {
                     String userAsString = objectMapper.writeValueAsString(user1);
                     users.add(userAsString);
                 }
+
+                rs.close();
+                stmt.close();
 
                 return users;
 
@@ -185,7 +159,32 @@ public class UserRepository {
                  from blogs
                  ) v
                  on r.blog_id = v.blog_id;
-                     """;
+                """;
+    }
+
+    private static void addBlogToUser(UserDTO user, ResultSet rs, HashSet<Integer> set, int blogId) throws SQLException{
+        set.add(blogId);
+        UserBlogDTO blog1 = new UserBlogDTO();
+        blog1.setId(blogId);
+        blog1.setTitle(rs.getString(4));
+        if(user.getBlogs()==null){
+            user.setBlogs(new ArrayList<UserBlogDTO>());
+        }
+        user.addBlog(blog1);
+    }
+
+    private static void addReplyToUser(UserDTO user1, ResultSet rs) throws SQLException{
+        UserReplyDTO reply1 = new UserReplyDTO();
+        reply1.setId(rs.getInt(6));
+        reply1.setTitle(rs.getString(7));
+        UserBlogDTO blog2 = new UserBlogDTO();
+        blog2.setId(rs.getInt(8));
+        blog2.setTitle(rs.getString(9));
+        reply1.setBlogDTO(blog2);
+        if (user1.getReplies() == null) {
+            user1.setReplies(new ArrayList<UserReplyDTO>());
+        }
+        user1.addReply(reply1);
     }
 
 }

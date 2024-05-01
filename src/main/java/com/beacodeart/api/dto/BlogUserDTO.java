@@ -1,4 +1,4 @@
-package com.beacodeart.api.DTOs;
+package com.beacodeart.api.dto;
 
 public class BlogUserDTO {
     private int user_id;

@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.beacodeart.api.models.User;
+import com.beacodeart.api.repositories.BlogRepository;
+import com.beacodeart.api.repositories.UserRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 

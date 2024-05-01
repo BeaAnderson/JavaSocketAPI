@@ -1,4 +1,4 @@
-package com.beacodeart.api;
+package com.beacodeart.api.repositories;
 
 import java.net.ConnectException;
 import java.sql.Connection;
@@ -9,7 +9,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
-import com.beacodeart.api.DTOs.BlogDTO;
+import com.beacodeart.api.APIConnection;
+import com.beacodeart.api.dto.BlogDTO;
 
 public class BlogRepository {
     static String password = APIConnection.getPassword();

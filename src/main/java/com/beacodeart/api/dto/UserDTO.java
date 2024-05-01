@@ -1,4 +1,4 @@
-package com.beacodeart.api.DTOs;
+package com.beacodeart.api.dto;
 
 import java.util.ArrayList;
 import java.util.List;
