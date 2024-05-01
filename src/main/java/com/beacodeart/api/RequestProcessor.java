@@ -5,9 +5,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.beacodeart.api.dto.BlogDTO;
+import com.beacodeart.api.dto.ReplyDTO;
 import com.beacodeart.api.models.User;
 import com.beacodeart.api.repositories.BlogRepository;
 import com.beacodeart.api.repositories.UserRepository;
+import com.beacodeart.api.repositories.ReplyRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -45,6 +47,7 @@ public class RequestProcessor implements Request.Visitor<byte[]> {
                         break;
                     case "replies":
                         twoListOfStrings = getReplies(url);
+                        break;
                     default:
                         twoListOfStrings.add("HELLO");
                         break;
@@ -87,8 +90,7 @@ public class RequestProcessor implements Request.Visitor<byte[]> {
     }
 
     private List<String> getReplies(String url) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getReplies'");
+        return ReplyRepository.getResource(url);
     }
 
     private List<String> getUsers(String url) {
@@ -110,6 +112,7 @@ public class RequestProcessor implements Request.Visitor<byte[]> {
                 break;
             case "replies":
                 postReply(body);
+                break;
             default:
                 break;
         }
@@ -118,8 +121,13 @@ public class RequestProcessor implements Request.Visitor<byte[]> {
     }
 
     private String postReply(String body) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'postReply'");
+        try {
+            ReplyDTO reply1 = mapper.readValue(body, ReplyDTO.class);
+            return ReplyRepository.postResource(reply1);
+        } catch (JsonProcessingException e){
+            e.printStackTrace();
+        }
+        return null;
     }
 
     private String postBlog(String body) {
