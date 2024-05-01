@@ -41,6 +41,7 @@ public class RequestProcessor implements Request.Visitor<byte[]> {
                         break;
                     case "blogs":
                         twoListOfStrings = getBlogs(url);
+                        break;
                     default:
                         twoListOfStrings.add("HELLO");
                         break;
@@ -87,8 +88,7 @@ public class RequestProcessor implements Request.Visitor<byte[]> {
     }
 
     private List<String> getBlogs(String url) {
-        BlogRepository blogRepository = new BlogRepository();
-        return blogRepository.getResource(url);
+        return BlogRepository.getResource(url);
     }
 
     @Override

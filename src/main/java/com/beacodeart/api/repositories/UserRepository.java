@@ -27,7 +27,6 @@ public class UserRepository {
     public static List<String> getResource(String givenUrl) {
 
         String[] spliturl = givenUrl.split("/");
-        System.out.println(url);
 
         // get the connection
         try (Connection conn = DriverManager.getConnection(url, username, password)) {
@@ -40,17 +39,17 @@ public class UserRepository {
                 ResultSet rs = stmt.executeQuery(query);
                 List<String> users = new ArrayList<>();
                 UserDTO user1 = new UserDTO();
+                //check this may need reset at every new user
                 HashSet<Integer> userBlogs = new HashSet<>();
 
                 while (rs.next()) {
                     if (rs.getInt(1) == user1.getId()) {
 
-                        int optBlogId = rs.getInt(3);
+                        int optBlogId = rs.getInt(4);
 
                         if (optBlogId != 0 && !userBlogs.contains(optBlogId)) {
                             addBlogToUser(user1, rs, userBlogs, optBlogId);
                         }
-
                         if (rs.getInt(6) != 0) {
                             addReplyToUser(user1, rs);
                         }
@@ -89,8 +88,8 @@ public class UserRepository {
 
                 return users;
 
-                // if the split url is 4 we are dealing with a request that looks like
-                // /user/id/{x}
+            // if the split url is 4 we are dealing with a request that looks like
+            // /users/param/{value}
             } else if (spliturl.length == 4) {
 
                 query = "select * from users where " + spliturl[2] + " = ?";
@@ -114,11 +113,9 @@ public class UserRepository {
                 return users;
 
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         return null;
     }
 
