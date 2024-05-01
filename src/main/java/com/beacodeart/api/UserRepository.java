@@ -165,25 +165,27 @@ public class UserRepository {
     }
 
     private static String getAllQuery() {
-        return "select u.user_id, \n" + //
-                "\tu.username, \n" + //
-                "\tu.password, \n" + //
-                "\tb.blog_id, \n" + //
-                "\tb.title, \n" + //
-                "\tr.reply_id, \n" + //
-                "\tr.title as 'reply_title', \n" + //
-                "\tr.blog_id as 'reply_blog',\n" + //
-                "    v.title as 'reply_blog_title'\n" + //
-                "from users u \n" + //
-                "\tleft join blogs b \n" + //
-                "\t\ton u.user_id = b.user_id \n" + //
-                "    left join replies r \n" + //
-                "\t\ton u.user_id = r.user_id\n" + //
-                "\tleft join (\n" + //
-                "    select title, blog_id\n" + //
-                "    from blogs\n" + //
-                "    ) v\n" + //
-                "\t\ton r.blog_id = v.blog_id";
+        return """
+                 select u.user_id,
+                 u.username,
+                 u.password,
+                 b.blog_id,
+                 b.title,
+                 r.reply_id,
+                 r.title as 'reply_title',
+                r.blog_id as 'reply_blog',
+                 v.title as 'reply_blog_title'
+                from users u
+                left join blogs b
+                 on u.user_id = b.user_id
+                 left join replies r
+                on u.user_id = r.user_id
+                 left join (
+                 select title, blog_id
+                 from blogs
+                 ) v
+                 on r.blog_id = v.blog_id;
+                     """;
     }
 
 }
