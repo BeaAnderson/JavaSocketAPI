@@ -2,6 +2,7 @@ package com.beacodeart.api.repositories;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -80,9 +81,32 @@ public class BlogRepository {
         return null;
     }
 
-    private static String postResource(Blog blog){
-        
+    public static String postResource(BlogDTO blog){
+        try (Connection conn = DriverManager.getConnection(url, username, password)){
+            //check user exists
+            String check = "SELECT * FROM users WHERE user_id = ?";
+            PreparedStatement stmt = conn.prepareStatement(check);
+            stmt.setInt(1, blog.getUserDTO().getUser_id());
+            ResultSet rs = stmt.executeQuery();
+            if(!rs.isBeforeFirst()){
+                throw new Exception("Not found");
+            }
+            rs.close();
+            stmt.close();
 
+            
+            //add the blog in
+            String query = "INSERT INTO blogs ( title, user_id ) VALUES ( ?, ? )";
+            PreparedStatement stmt2 = conn.prepareStatement(query);
+            
+            stmt2.setString(1, blog.getTitle());
+            stmt2.setInt(2, blog.getUserDTO().getUser_id());
+            stmt2.executeUpdate();
+            stmt2.close();
+            
+        } catch (Exception e){
+            e.printStackTrace();
+        }
         return "success";
     }
 
@@ -97,11 +121,11 @@ public class BlogRepository {
             v.user_id,
             v.username
          FROM blogs b
-         inner join users u
+         left join users u
          on b.user_id = u.user_id
-         inner join replies r
+         left join replies r
          on b.blog_id = r.blog_id
-         inner join (
+         left join (
             select user_id,
             username
             from users

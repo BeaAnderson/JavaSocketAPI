@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.beacodeart.api.dto.BlogDTO;
 import com.beacodeart.api.models.User;
 import com.beacodeart.api.repositories.BlogRepository;
 import com.beacodeart.api.repositories.UserRepository;
@@ -97,12 +98,25 @@ public class RequestProcessor implements Request.Visitor<byte[]> {
             case "users":
                 postUser(body);
                 break;
-
+            case "blogs":
+                postBlog(body);
+                break;
             default:
                 break;
         }
 
         return "HTTP/1.1 200 OK\r\n\r\nHello".getBytes();
+    }
+
+    private String postBlog(String body) {
+        try {
+            BlogDTO blog1 = mapper.readValue(body, BlogDTO.class);
+            return BlogRepository.postResource(blog1);
+        } catch (JsonProcessingException e){
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
     private String postUser(String body) {
