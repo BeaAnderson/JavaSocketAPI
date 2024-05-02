@@ -23,58 +23,78 @@ public class BlogRepository {
     static String username = APIConnection.getUsername();
     static ObjectMapper objectMapper = new ObjectMapper();
 
-    //TODO get specific resource
     public static List<String> getResource(String givenUrl) {
         String[] spliturl = givenUrl.split("/");
 
         try (Connection conn = DriverManager.getConnection(url, username, password)) {
 
-            String query = getAllQuery();
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(query);
-            List<String> blogs = new ArrayList<>();
-            BlogDTO blog1 = new BlogDTO();
-            //check this may need reset at every new blog
-            HashSet<Integer> blogusers = new HashSet<>();
+            if (spliturl.length == 2){
+                String query = getAllQuery();
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery(query);
+                List<String> blogs = new ArrayList<>();
+                BlogDTO blog1 = new BlogDTO();
+                //check this may need reset at every new blog
+                HashSet<Integer> blogusers = new HashSet<>();
 
-            while (rs.next()){
-                if(rs.getInt(1) == blog1.getBlog_id()){
+                while (rs.next()){
+                    if(rs.getInt(1) == blog1.getBlog_id()){
 
-                    if (rs.getInt(3) !=0 ){
-                        addUserToBlog(blog1, rs, blogusers);
-                    }
-                    if(rs.getInt(5)!=0){
-                        addReplyToBlog(blog1, rs);
-                    }
-                } else {
-                    System.out.println(blog1.getBlog_id());
-                    if (blog1!=null && blog1.getBlog_id()!=0){
-                        String blogAsString = objectMapper.writeValueAsString(blog1);
-                        blogs.add(blogAsString);
-                        blog1 = new BlogDTO();
-                    }
+                        if (rs.getInt(3) !=0 ){
+                            addUserToBlog(blog1, rs, blogusers);
+                        }
+                        if(rs.getInt(5)!=0){
+                            addReplyToBlog(blog1, rs);
+                        }
+                    } else {
+                        if (blog1!=null && blog1.getBlog_id()!=0){
+                            String blogAsString = objectMapper.writeValueAsString(blog1);
+                            blogs.add(blogAsString);
+                            blog1 = new BlogDTO();
+                        }
 
-                    blog1.setBlog_id(rs.getInt(1));
-                    blog1.setTitle(rs.getString(2));
+                        blog1.setBlog_id(rs.getInt(1));
+                        blog1.setTitle(rs.getString(2));
 
-                    if(rs.getInt(3)!=0){
-                        addUserToBlog(blog1, rs, blogusers);
-                    }
-                    if(rs.getInt(5)!=0){
-                        addReplyToBlog(blog1, rs);
+                        if(rs.getInt(3)!=0){
+                            addUserToBlog(blog1, rs, blogusers);
+                        }
+                        if(rs.getInt(5)!=0){
+                            addReplyToBlog(blog1, rs);
+                        }
                     }
                 }
+
+                if (blog1!=null){
+                    String blogAsString = objectMapper.writeValueAsString(blog1);
+                    blogs.add(blogAsString);
+                }
+
+                rs.close();
+                stmt.close();
+
+                return blogs;
+            } else if (spliturl.length ==4){
+                
+                String query = "select * from blogs where " + spliturl[2] + "= ?";
+                PreparedStatement stmt = conn.prepareStatement(query);
+                stmt.setString(1, spliturl[3]);
+                ResultSet rs = stmt.executeQuery();
+                List<String> blogs = new ArrayList<>();
+
+                while(rs.next()){
+                    Blog blog = new Blog();
+                    blog.setBlog_id(rs.getInt(1));
+                    blog.setTitle(rs.getString(2));
+                    String blogAsString = objectMapper.writeValueAsString(blog);
+                    blogs.add(blogAsString);
+                }
+
+                rs.close();
+                stmt.close();
+
+                return blogs;
             }
-
-            if (blog1!=null){
-                String blogAsString = objectMapper.writeValueAsString(blog1);
-                blogs.add(blogAsString);
-            }
-
-            rs.close();
-            stmt.close();
-
-            return blogs;
 
         } catch (Exception e) {
             e.printStackTrace();

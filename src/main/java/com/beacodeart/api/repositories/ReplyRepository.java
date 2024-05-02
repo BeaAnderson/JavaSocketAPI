@@ -5,15 +5,16 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
-import java.util.HashSet;
+
 import java.util.List;
-import java.util.Set;
+
 import java.sql.Statement;
 
 import com.beacodeart.api.APIConnection;
 import com.beacodeart.api.dto.ReplyBlogDTO;
 import com.beacodeart.api.dto.ReplyDTO;
 import com.beacodeart.api.dto.ReplyUserDTO;
+import com.beacodeart.api.models.Reply;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 
@@ -23,51 +24,72 @@ public class ReplyRepository {
     static String username = APIConnection.getUsername();
     static ObjectMapper objectMapper = new ObjectMapper();
 
-    //TODO get specific resource
     public static List<String> getResource(String url1){
         String[] spliturl = url1.split("/");
 
         try (Connection conn = DriverManager.getConnection(url, username, password)){
-            String query = getAllQuery();
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(query);
-            List<String> replies = new ArrayList<>();
-            ReplyDTO reply1 = new ReplyDTO();
-            //HashSet<Integer> replyusers = new HashSet<>();
+            if(spliturl.length == 2){
+                String query = getAllQuery();
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery(query);
+                List<String> replies = new ArrayList<>();
+                ReplyDTO reply1 = new ReplyDTO();
+                //HashSet<Integer> replyusers = new HashSet<>();
 
-            // TODO simplify, doesn't need to handle many to one
-            while (rs.next()){
-                if (rs.getInt(1)== reply1.getReply_id()){
-                    if (rs.getInt(3)!=0){
-                        addUserToReply(reply1, rs);
-                    }
-                    if (rs.getInt(5)!=0){
-                        addBlogToReply(reply1, rs);
-                    }
-                } else {
-                    if (reply1!=null && reply1.getReply_id()!=0){
-                        String replyAsString = objectMapper.writeValueAsString(reply1);
-                        replies.add(replyAsString);
-                        reply1 = new ReplyDTO();
-                    }
-                    reply1.setReply_id(rs.getInt(1));
-                    reply1.setTitle(rs.getString(2));
+                // TODO simplify, doesn't need to handle many to one
+                while (rs.next()){
+                    if (rs.getInt(1)== reply1.getReply_id()){
+                        if (rs.getInt(3)!=0){
+                            addUserToReply(reply1, rs);
+                        }
+                        if (rs.getInt(5)!=0){
+                            addBlogToReply(reply1, rs);
+                        }
+                    } else {
+                        if (reply1!=null && reply1.getReply_id()!=0){
+                            String replyAsString = objectMapper.writeValueAsString(reply1);
+                            replies.add(replyAsString);
+                            reply1 = new ReplyDTO();
+                        }
+                        reply1.setReply_id(rs.getInt(1));
+                        reply1.setTitle(rs.getString(2));
 
-                    if(rs.getInt(3)!=0){
-                        addUserToReply(reply1, rs);
-                    }
-                    if(rs.getInt(5)!=0){
-                        addBlogToReply(reply1, rs);
+                        if(rs.getInt(3)!=0){
+                            addUserToReply(reply1, rs);
+                        }
+                        if(rs.getInt(5)!=0){
+                            addBlogToReply(reply1, rs);
+                        }
                     }
                 }
+                if (reply1!=null){
+                    String replyAsString = objectMapper.writeValueAsString(reply1);
+                    replies.add(replyAsString);
+                }
+                rs.close();
+                stmt.close();
+                return replies;
+
+            } else if (spliturl.length == 4){
+                String query = "select * from replies where " + spliturl[2] + " = ?";
+                PreparedStatement stmt = conn.prepareStatement(query);
+                stmt.setString(1, spliturl[3]);
+                ResultSet rs = stmt.executeQuery();
+                List<String> replies = new ArrayList<>();
+
+                while (rs.next()) {
+                    Reply reply = new Reply();
+                    reply.setReply_id(rs.getInt(1));
+                    reply.setTitle(rs.getString(2));
+                    String replyAsString = objectMapper.writeValueAsString(reply);
+                    replies.add(replyAsString);
+                }
+
+                rs.close();
+                stmt.close();
+
+                return replies;
             }
-            if (reply1!=null){
-                String replyAsString = objectMapper.writeValueAsString(reply1);
-                replies.add(replyAsString);
-            }
-            rs.close();
-            stmt.close();
-            return replies;
         } catch (Exception e){
             e.printStackTrace();
         }

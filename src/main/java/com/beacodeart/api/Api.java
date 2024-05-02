@@ -100,6 +100,8 @@ public class Api {
 				return new GetRequest(url, headers);
 			case "POST":
 				return new PostRequest(url, headers, body);
+			case "PUT":
+			case "DELETE":
 			default:
 				break;
 		}

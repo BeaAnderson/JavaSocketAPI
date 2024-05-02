@@ -156,15 +156,64 @@ public class RequestProcessor implements Request.Visitor<byte[]> {
     }
 
     @Override
-    public byte[] visitPutRequest() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'visitPutRequest'");
+    public byte[] visitPutRequest(String url, String body) {
+        switch (url.substring(1)) {
+            case "users":
+                putUser(url, body);
+                break;
+            case "blogs":
+                putBlog(url, body);
+                break;
+            case "replies":
+                putReply(url, body);
+                break;
+        
+            default:
+                break;
+        }
+        return "HTTP/1.1 200 OK\r\n\r\nHello".getBytes();
     }
 
+    private String putReply(String url, String body) {
+        return null;
+    }
+
+    private String putBlog(String url, String body) {
+        return null;
+    }
+
+    private String putUser(String url, String body){
+        return null;
+    }
+    
     @Override
-    public byte[] visitDeleteRequest() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'visitDeleteRequest'");
+    public byte[] visitDeleteRequest(String url, String body) {
+        switch (body) {
+            case "users":
+                deleteUser(url, body);
+                break;
+            case "blogs":
+                deleteBlog(url, body);
+                break;
+            case "replies":
+                deleteReply(url, body);
+                break;
+            default:
+                break;
+        }
+        return "HTTP/1.1 200 OK\r\n\r\nHello".getBytes();
+    }
+
+    private String deleteReply(String url, String body) {
+        return null;
+    }
+
+    private String deleteBlog(String url, String body) {
+        return null;
+    }
+
+    private String deleteUser(String url, String body) {
+        return null;
     }
 
 }

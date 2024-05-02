@@ -13,16 +13,32 @@ public class Reply {
         this.blog = blog;
     }
 
-    public int getReply_id() {
+    public Reply() {
+		//TODO Auto-generated constructor stub
+	}
+
+	public int getReply_id() {
         return reply_id;
+    }
+    public void setReply_id(int reply_id) {
+        this.reply_id = reply_id;
     }
     public String getTitle() {
         return title;
     }
+    public void setTitle(String title) {
+        this.title = title;
+    }
     public User getUser() {
         return user;
     }
+    public void setUser(User user) {
+        this.user = user;
+    }
     public Blog getBlog() {
         return blog;
+    }
+    public void setBlog(Blog blog) {
+        this.blog = blog;
     }
 }

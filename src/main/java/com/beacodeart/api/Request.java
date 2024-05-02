@@ -11,9 +11,9 @@ abstract class Request {
 
         R visitPostRequest(String url, String body);
 
-        R visitPutRequest();
+        R visitPutRequest(String url, String body);
 
-        R visitDeleteRequest();
+        R visitDeleteRequest(String url, String body);
     }
 
     static class GetRequest extends Request {
@@ -47,6 +47,41 @@ abstract class Request {
         <R> R accept(Visitor<R> visitor) {
             return visitor.visitPostRequest(url, body);
         }
+    }
+
+    static class PutRequest extends Request{
+        private String body;
+
+        public PutRequest(String url, Map<String, String> headers, String body){
+            this.url = url;
+            this.headers = headers;
+            this.body = body;
+        }
+
+        public String getBody(){
+            return body;
+        }
+
+        @Override
+        <R> R accept(Visitor<R> visitor) {
+            return visitor.visitPutRequest(url, body);
+        }
+    }
+
+    static class DeleteRequest extends Request{
+        public String body;
+
+        public DeleteRequest(String url, Map<String, String> headers, String body){
+            this.url = url;
+            this.headers = headers;
+            this.body = body;
+        }
+
+        @Override
+        <R> R accept(Visitor<R> visitor) {
+            return visitor.visitDeleteRequest(url, body);
+        }
+
     }
 
     public Map<String, String> getHeaders() {
