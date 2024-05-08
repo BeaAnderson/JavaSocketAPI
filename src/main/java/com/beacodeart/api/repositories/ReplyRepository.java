@@ -11,12 +11,12 @@ import java.util.List;
 import java.sql.Statement;
 
 import com.beacodeart.api.APIConnection;
+import com.beacodeart.api.dto.DeleteReplyDTO;
 import com.beacodeart.api.dto.ReplyBlogDTO;
 import com.beacodeart.api.dto.ReplyDTO;
 import com.beacodeart.api.dto.ReplyUserDTO;
 import com.beacodeart.api.models.Reply;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 
 public class ReplyRepository {
     static String password = APIConnection.getPassword();
@@ -24,29 +24,29 @@ public class ReplyRepository {
     static String username = APIConnection.getUsername();
     static ObjectMapper objectMapper = new ObjectMapper();
 
-    public static List<String> getResource(String url1){
+    public static List<String> getResource(String url1) {
         String[] spliturl = url1.split("/");
 
-        try (Connection conn = DriverManager.getConnection(url, username, password)){
-            if(spliturl.length == 2){
+        try (Connection conn = DriverManager.getConnection(url, username, password)) {
+            if (spliturl.length == 2) {
                 String query = getAllQuery();
                 Statement stmt = conn.createStatement();
                 ResultSet rs = stmt.executeQuery(query);
                 List<String> replies = new ArrayList<>();
                 ReplyDTO reply1 = new ReplyDTO();
-                //HashSet<Integer> replyusers = new HashSet<>();
+                // HashSet<Integer> replyusers = new HashSet<>();
 
                 // TODO simplify, doesn't need to handle many to one
-                while (rs.next()){
-                    if (rs.getInt(1)== reply1.getReply_id()){
-                        if (rs.getInt(3)!=0){
+                while (rs.next()) {
+                    if (rs.getInt(1) == reply1.getReply_id()) {
+                        if (rs.getInt(3) != 0) {
                             addUserToReply(reply1, rs);
                         }
-                        if (rs.getInt(5)!=0){
+                        if (rs.getInt(5) != 0) {
                             addBlogToReply(reply1, rs);
                         }
                     } else {
-                        if (reply1!=null && reply1.getReply_id()!=0){
+                        if (reply1 != null && reply1.getReply_id() != 0) {
                             String replyAsString = objectMapper.writeValueAsString(reply1);
                             replies.add(replyAsString);
                             reply1 = new ReplyDTO();
@@ -54,15 +54,15 @@ public class ReplyRepository {
                         reply1.setReply_id(rs.getInt(1));
                         reply1.setTitle(rs.getString(2));
 
-                        if(rs.getInt(3)!=0){
+                        if (rs.getInt(3) != 0) {
                             addUserToReply(reply1, rs);
                         }
-                        if(rs.getInt(5)!=0){
+                        if (rs.getInt(5) != 0) {
                             addBlogToReply(reply1, rs);
                         }
                     }
                 }
-                if (reply1!=null){
+                if (reply1 != null) {
                     String replyAsString = objectMapper.writeValueAsString(reply1);
                     replies.add(replyAsString);
                 }
@@ -70,7 +70,7 @@ public class ReplyRepository {
                 stmt.close();
                 return replies;
 
-            } else if (spliturl.length == 4){
+            } else if (spliturl.length == 4) {
                 String query = "select * from replies where " + spliturl[2] + " = ?";
                 PreparedStatement stmt = conn.prepareStatement(query);
                 stmt.setString(1, spliturl[3]);
@@ -90,21 +90,21 @@ public class ReplyRepository {
 
                 return replies;
             }
-        } catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
-        
+
         return null;
     }
 
-    public static String postResource(ReplyDTO reply){
-        try (Connection conn = DriverManager.getConnection(url, username, password)){
-            //check user and blog exist
+    public static String postResource(ReplyDTO reply) {
+        try (Connection conn = DriverManager.getConnection(url, username, password)) {
+            // check user and blog exist
             String check1 = "SELECT * FROM users WHERE user_id = ?";
             PreparedStatement stmt = conn.prepareStatement(check1);
             stmt.setInt(1, reply.getUser().getUser_id());
             ResultSet rs = stmt.executeQuery();
-            if(!rs.isBeforeFirst()){
+            if (!rs.isBeforeFirst()) {
                 throw new Exception("Not Found");
             }
             rs.close();
@@ -114,7 +114,7 @@ public class ReplyRepository {
             PreparedStatement stmt2 = conn.prepareStatement(check2);
             stmt2.setInt(1, reply.getBlog().getBlog_id());
             ResultSet rs2 = stmt2.executeQuery();
-            if(!rs2.isBeforeFirst()){
+            if (!rs2.isBeforeFirst()) {
                 throw new Exception("Not found");
             }
             rs2.close();
@@ -127,13 +127,18 @@ public class ReplyRepository {
             stmt3.setInt(3, reply.getBlog().getBlog_id());
             stmt3.executeUpdate();
             stmt3.close();
-        } catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return "success";
     }
 
-    private static void addBlogToReply(ReplyDTO reply1, ResultSet rs) throws Exception{
+    public static String deleteResource(String url1, DeleteReplyDTO replyDTO) {
+
+        return "success";
+    }
+
+    private static void addBlogToReply(ReplyDTO reply1, ResultSet rs) throws Exception {
         ReplyBlogDTO blog1 = new ReplyBlogDTO();
         blog1.setBlog_id(rs.getInt(5));
         blog1.setTitle(rs.getString(6));
@@ -144,7 +149,7 @@ public class ReplyRepository {
         reply1.setBlog(blog1);
     }
 
-    private static void addUserToReply(ReplyDTO reply1, ResultSet rs) throws Exception{
+    private static void addUserToReply(ReplyDTO reply1, ResultSet rs) throws Exception {
         int userId = rs.getInt(3);
         ReplyUserDTO user = new ReplyUserDTO();
         user.setUser_id(userId);
@@ -152,27 +157,25 @@ public class ReplyRepository {
         reply1.setUser(user);
     }
 
-    
-
     private static String getAllQuery() {
         return """
-            SELECT r.reply_id,
-            r.title,
-            u.user_id,
-            u.username,
-            b.blog_id,
-            b.title,
-            v.user_id,
-            v.username
-            from replies r
-            left join users u
-            on r.user_id = u.user_id
-            left join blogs b
-            on r.blog_id = b.blog_id
-            left join (select user_id,
-            username
-            from users) v
-            on b.user_id = v.user_id
-                """;
+                SELECT r.reply_id,
+                r.title,
+                u.user_id,
+                u.username,
+                b.blog_id,
+                b.title,
+                v.user_id,
+                v.username
+                from replies r
+                left join users u
+                on r.user_id = u.user_id
+                left join blogs b
+                on r.blog_id = b.blog_id
+                left join (select user_id,
+                username
+                from users) v
+                on b.user_id = v.user_id
+                    """;
     }
 }

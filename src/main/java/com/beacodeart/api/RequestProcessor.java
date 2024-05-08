@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.beacodeart.api.dto.BlogDTO;
+import com.beacodeart.api.dto.DeleteReplyDTO;
 import com.beacodeart.api.dto.ReplyDTO;
 import com.beacodeart.api.models.User;
 import com.beacodeart.api.repositories.BlogRepository;
@@ -58,8 +59,7 @@ public class RequestProcessor implements Request.Visitor<byte[]> {
                 String contentlength = "Content-length: ";
                 String contenttype = "Content-type: application/json \r\n\r\n";
 
-
-                //see if this can be done using object mapper
+                // see if this can be done using object mapper
                 String two = "[";
 
                 int i = 0;
@@ -126,7 +126,7 @@ public class RequestProcessor implements Request.Visitor<byte[]> {
         try {
             ReplyDTO reply1 = mapper.readValue(body, ReplyDTO.class);
             return ReplyRepository.postResource(reply1);
-        } catch (JsonProcessingException e){
+        } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
         return null;
@@ -136,7 +136,7 @@ public class RequestProcessor implements Request.Visitor<byte[]> {
         try {
             BlogDTO blog1 = mapper.readValue(body, BlogDTO.class);
             return BlogRepository.postResource(blog1);
-        } catch (JsonProcessingException e){
+        } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
 
@@ -167,7 +167,7 @@ public class RequestProcessor implements Request.Visitor<byte[]> {
             case "replies":
                 putReply(url, body);
                 break;
-        
+
             default:
                 break;
         }
@@ -182,10 +182,10 @@ public class RequestProcessor implements Request.Visitor<byte[]> {
         return null;
     }
 
-    private String putUser(String url, String body){
+    private String putUser(String url, String body) {
         return null;
     }
-    
+
     @Override
     public byte[] visitDeleteRequest(String url, String body) {
         switch (body) {
@@ -205,6 +205,12 @@ public class RequestProcessor implements Request.Visitor<byte[]> {
     }
 
     private String deleteReply(String url, String body) {
+        try {
+            DeleteReplyDTO replyDTO = mapper.readValue(body, DeleteReplyDTO.class);
+            return ReplyRepository.deleteResource(url, replyDTO);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return null;
     }
 

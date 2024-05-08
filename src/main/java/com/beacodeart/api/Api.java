@@ -10,8 +10,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.beacodeart.api.Request.DeleteRequest;
 import com.beacodeart.api.Request.GetRequest;
 import com.beacodeart.api.Request.PostRequest;
+import com.beacodeart.api.Request.PutRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 //impliment singleton for repositoriers?
@@ -101,7 +103,9 @@ public class Api {
 			case "POST":
 				return new PostRequest(url, headers, body);
 			case "PUT":
+				return new PutRequest(url, headers, body);
 			case "DELETE":
+				return new DeleteRequest(url, headers, body);
 			default:
 				break;
 		}
