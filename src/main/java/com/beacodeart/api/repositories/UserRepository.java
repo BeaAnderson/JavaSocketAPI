@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import com.beacodeart.api.APIConnection;
+import com.beacodeart.api.dto.DeleteUserDTO;
 import com.beacodeart.api.dto.UserBlogDTO;
 import com.beacodeart.api.dto.UserDTO;
 import com.beacodeart.api.dto.UserReplyDTO;
@@ -39,7 +40,7 @@ public class UserRepository {
                 ResultSet rs = stmt.executeQuery(query);
                 List<String> users = new ArrayList<>();
                 UserDTO user1 = new UserDTO();
-                //check this may need reset at every new user
+                // check this may need reset at every new user
                 HashSet<Integer> userBlogs = new HashSet<>();
 
                 while (rs.next()) {
@@ -88,8 +89,8 @@ public class UserRepository {
 
                 return users;
 
-            // if the split url is 4 we are dealing with a request that looks like
-            // /users/param/{value}
+                // if the split url is 4 we are dealing with a request that looks like
+                // /users/param/{value}
             } else if (spliturl.length == 4) {
 
                 query = "select * from users where " + spliturl[2] + " = ?";
@@ -159,18 +160,19 @@ public class UserRepository {
                 """;
     }
 
-    private static void addBlogToUser(UserDTO user, ResultSet rs, HashSet<Integer> set, int blogId) throws SQLException{
+    private static void addBlogToUser(UserDTO user, ResultSet rs, HashSet<Integer> set, int blogId)
+            throws SQLException {
         set.add(blogId);
         UserBlogDTO blog1 = new UserBlogDTO();
         blog1.setId(blogId);
         blog1.setTitle(rs.getString(4));
-        if(user.getBlogs()==null){
+        if (user.getBlogs() == null) {
             user.setBlogs(new ArrayList<UserBlogDTO>());
         }
         user.addBlog(blog1);
     }
 
-    private static void addReplyToUser(UserDTO user1, ResultSet rs) throws SQLException{
+    private static void addReplyToUser(UserDTO user1, ResultSet rs) throws SQLException {
         UserReplyDTO reply1 = new UserReplyDTO();
         reply1.setId(rs.getInt(6));
         reply1.setTitle(rs.getString(7));
@@ -182,6 +184,36 @@ public class UserRepository {
             user1.setReplies(new ArrayList<UserReplyDTO>());
         }
         user1.addReply(reply1);
+    }
+
+    public static String deleteResource(String url2, DeleteUserDTO userDTO) throws Exception {
+        try (Connection con = DriverManager.getConnection(url, username, password)) {
+            System.out.println("in repo layer");
+            int userId = Integer.parseInt(url2.split("/")[3]);
+            String query = "select * from users where username = ? and user_id = ?";
+            PreparedStatement stmt = con.prepareStatement(query);
+            stmt.setString(1, userDTO.getUsername());
+            stmt.setInt(2, userId);
+            ResultSet rs = stmt.executeQuery();
+            if (!rs.isBeforeFirst()) {
+                System.out.println("error");
+                throw new Exception("user notfound");
+            }
+            rs.close();
+            stmt.close();
+            String query2 = "delete from users where user_id = ?";
+            System.out.println("User = " + userId);
+            PreparedStatement stmt2 = con.prepareStatement(query2);
+            stmt2.setInt(1, userId);
+            stmt2.execute();
+            stmt2.close();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+
+        return null;
+
+        // delete from users where username = 'testUserPass' and user_id = 6;
     }
 
 }

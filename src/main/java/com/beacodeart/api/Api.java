@@ -28,7 +28,7 @@ public class Api {
 		// keep the server running
 		while (true) {
 
-			//comment
+			// comment
 			Socket client = serverSocket.accept();
 			client.setSoTimeout(0);
 
@@ -106,6 +106,7 @@ public class Api {
 			case "PUT":
 				return new PutRequest(url, headers, body);
 			case "DELETE":
+				System.out.println("del req");
 				return new DeleteRequest(url, headers, body);
 			default:
 				break;

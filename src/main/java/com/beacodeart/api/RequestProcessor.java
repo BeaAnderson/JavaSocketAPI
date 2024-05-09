@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.beacodeart.api.dto.BlogDTO;
 import com.beacodeart.api.dto.DeleteReplyDTO;
+import com.beacodeart.api.dto.DeleteUserDTO;
 import com.beacodeart.api.dto.ReplyDTO;
 import com.beacodeart.api.models.User;
 import com.beacodeart.api.repositories.BlogRepository;
@@ -188,8 +189,9 @@ public class RequestProcessor implements Request.Visitor<byte[]> {
 
     @Override
     public byte[] visitDeleteRequest(String url, String body) {
-        switch (body) {
+        switch (url.split("/")[1]) {
             case "users":
+                System.out.println("delet users");
                 deleteUser(url, body);
                 break;
             case "blogs":
@@ -219,6 +221,12 @@ public class RequestProcessor implements Request.Visitor<byte[]> {
     }
 
     private String deleteUser(String url, String body) {
+        try {
+            DeleteUserDTO userDTO = mapper.readValue(body, DeleteUserDTO.class);
+            return UserRepository.deleteResource(url, userDTO);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return null;
     }
 
