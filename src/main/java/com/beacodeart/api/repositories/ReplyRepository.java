@@ -134,7 +134,26 @@ public class ReplyRepository {
     }
 
     public static String deleteResource(String url1, DeleteReplyDTO replyDTO) {
-
+        try (Connection conn = DriverManager.getConnection(url, username, password)) {
+            int replyId = Integer.parseInt(url1.split("/")[3]);
+            String query = "select * from replies where reply_id = ? and title like ?";
+            PreparedStatement stmt = conn.prepareStatement(query);
+            stmt.setInt(1, replyId);
+            stmt.setString(2, "%" + replyDTO.getTitle() + "%");
+            ResultSet rs = stmt.executeQuery();
+            if (!rs.isBeforeFirst()) {
+                throw new Exception("user not found");
+            }
+            rs.close();
+            stmt.close();
+            String query2 = "delete from replies where reply_id = ?";
+            PreparedStatement stmt2 = conn.prepareStatement(query2);
+            stmt2.setInt(1, replyId);
+            stmt2.execute();
+            stmt2.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return "success";
     }
 

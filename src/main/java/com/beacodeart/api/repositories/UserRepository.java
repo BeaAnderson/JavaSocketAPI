@@ -186,9 +186,8 @@ public class UserRepository {
         user1.addReply(reply1);
     }
 
-    public static String deleteResource(String url2, DeleteUserDTO userDTO) throws Exception {
+    public static String deleteResource(String url2, DeleteUserDTO userDTO) {
         try (Connection con = DriverManager.getConnection(url, username, password)) {
-            System.out.println("in repo layer");
             int userId = Integer.parseInt(url2.split("/")[3]);
             String query = "select * from users where username = ? and user_id = ?";
             PreparedStatement stmt = con.prepareStatement(query);
@@ -196,13 +195,11 @@ public class UserRepository {
             stmt.setInt(2, userId);
             ResultSet rs = stmt.executeQuery();
             if (!rs.isBeforeFirst()) {
-                System.out.println("error");
-                throw new Exception("user notfound");
+                throw new Exception("user not found");
             }
             rs.close();
             stmt.close();
             String query2 = "delete from users where user_id = ?";
-            System.out.println("User = " + userId);
             PreparedStatement stmt2 = con.prepareStatement(query2);
             stmt2.setInt(1, userId);
             stmt2.execute();
