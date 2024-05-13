@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.beacodeart.api.dto.BlogDTO;
+import com.beacodeart.api.dto.DeleteBlogDTO;
 import com.beacodeart.api.dto.DeleteReplyDTO;
 import com.beacodeart.api.dto.DeleteUserDTO;
 import com.beacodeart.api.dto.ReplyDTO;
@@ -217,6 +218,12 @@ public class RequestProcessor implements Request.Visitor<byte[]> {
     }
 
     private String deleteBlog(String url, String body) {
+        try {
+            DeleteBlogDTO blogDTO = mapper.readValue(body, DeleteBlogDTO.class);
+            return BlogRepository.deleteResource(url, blogDTO);
+        } catch (Exception e) {
+            // TODO: handle exception
+        }
         return null;
     }
 

@@ -14,6 +14,7 @@ import com.beacodeart.api.APIConnection;
 import com.beacodeart.api.dto.BlogDTO;
 import com.beacodeart.api.dto.BlogReplyDTO;
 import com.beacodeart.api.dto.BlogUserDTO;
+import com.beacodeart.api.dto.DeleteBlogDTO;
 import com.beacodeart.api.models.Blog;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -28,26 +29,26 @@ public class BlogRepository {
 
         try (Connection conn = DriverManager.getConnection(url, username, password)) {
 
-            if (spliturl.length == 2){
+            if (spliturl.length == 2) {
                 String query = getAllQuery();
                 Statement stmt = conn.createStatement();
                 ResultSet rs = stmt.executeQuery(query);
                 List<String> blogs = new ArrayList<>();
                 BlogDTO blog1 = new BlogDTO();
-                //check this may need reset at every new blog
+                // check this may need reset at every new blog
                 HashSet<Integer> blogusers = new HashSet<>();
 
-                while (rs.next()){
-                    if(rs.getInt(1) == blog1.getBlog_id()){
+                while (rs.next()) {
+                    if (rs.getInt(1) == blog1.getBlog_id()) {
 
-                        if (rs.getInt(3) !=0 ){
+                        if (rs.getInt(3) != 0) {
                             addUserToBlog(blog1, rs, blogusers);
                         }
-                        if(rs.getInt(5)!=0){
+                        if (rs.getInt(5) != 0) {
                             addReplyToBlog(blog1, rs);
                         }
                     } else {
-                        if (blog1!=null && blog1.getBlog_id()!=0){
+                        if (blog1 != null && blog1.getBlog_id() != 0) {
                             String blogAsString = objectMapper.writeValueAsString(blog1);
                             blogs.add(blogAsString);
                             blog1 = new BlogDTO();
@@ -56,16 +57,16 @@ public class BlogRepository {
                         blog1.setBlog_id(rs.getInt(1));
                         blog1.setTitle(rs.getString(2));
 
-                        if(rs.getInt(3)!=0){
+                        if (rs.getInt(3) != 0) {
                             addUserToBlog(blog1, rs, blogusers);
                         }
-                        if(rs.getInt(5)!=0){
+                        if (rs.getInt(5) != 0) {
                             addReplyToBlog(blog1, rs);
                         }
                     }
                 }
 
-                if (blog1!=null){
+                if (blog1 != null) {
                     String blogAsString = objectMapper.writeValueAsString(blog1);
                     blogs.add(blogAsString);
                 }
@@ -74,15 +75,15 @@ public class BlogRepository {
                 stmt.close();
 
                 return blogs;
-            } else if (spliturl.length ==4){
-                
+            } else if (spliturl.length == 4) {
+
                 String query = "select * from blogs where " + spliturl[2] + "= ?";
                 PreparedStatement stmt = conn.prepareStatement(query);
                 stmt.setString(1, spliturl[3]);
                 ResultSet rs = stmt.executeQuery();
                 List<String> blogs = new ArrayList<>();
 
-                while(rs.next()){
+                while (rs.next()) {
                     Blog blog = new Blog();
                     blog.setBlog_id(rs.getInt(1));
                     blog.setTitle(rs.getString(2));
@@ -102,30 +103,29 @@ public class BlogRepository {
         return null;
     }
 
-    public static String postResource(BlogDTO blog){
-        try (Connection conn = DriverManager.getConnection(url, username, password)){
-            //check user exists
+    public static String postResource(BlogDTO blog) {
+        try (Connection conn = DriverManager.getConnection(url, username, password)) {
+            // check user exists
             String check = "SELECT * FROM users WHERE user_id = ?";
             PreparedStatement stmt = conn.prepareStatement(check);
             stmt.setInt(1, blog.getUserDTO().getUser_id());
             ResultSet rs = stmt.executeQuery();
-            if(!rs.isBeforeFirst()){
+            if (!rs.isBeforeFirst()) {
                 throw new Exception("Not found");
             }
             rs.close();
             stmt.close();
 
-            
-            //add the blog in
+            // add the blog in
             String query = "INSERT INTO blogs ( title, user_id ) VALUES ( ?, ? )";
             PreparedStatement stmt2 = conn.prepareStatement(query);
-            
+
             stmt2.setString(1, blog.getTitle());
             stmt2.setInt(2, blog.getUserDTO().getUser_id());
             stmt2.executeUpdate();
             stmt2.close();
-            
-        } catch (Exception e){
+
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return "success";
@@ -133,29 +133,29 @@ public class BlogRepository {
 
     private static String getAllQuery() {
         return """
-            SELECT b.blog_id,
-            b.title,
-            u.user_id,
-            u.username,
-            r.reply_id,
-            r.title,
-            v.user_id,
-            v.username
-         FROM blogs b
-         left join users u
-         on b.user_id = u.user_id
-         left join replies r
-         on b.blog_id = r.blog_id
-         left join (
-            select user_id,
-            username
-            from users
-         ) v
-         on r.user_id = v.user_id 
-                """;
+                   SELECT b.blog_id,
+                   b.title,
+                   u.user_id,
+                   u.username,
+                   r.reply_id,
+                   r.title,
+                   v.user_id,
+                   v.username
+                FROM blogs b
+                left join users u
+                on b.user_id = u.user_id
+                left join replies r
+                on b.blog_id = r.blog_id
+                left join (
+                   select user_id,
+                   username
+                   from users
+                ) v
+                on r.user_id = v.user_id
+                       """;
     }
 
-    public static void addUserToBlog(BlogDTO blog, ResultSet rs, HashSet<Integer> set) throws SQLException{
+    public static void addUserToBlog(BlogDTO blog, ResultSet rs, HashSet<Integer> set) throws SQLException {
         int userId = rs.getInt(3);
         set.add(userId);
         BlogUserDTO user1 = new BlogUserDTO();
@@ -164,7 +164,7 @@ public class BlogRepository {
         blog.setUserDTO(user1);
     }
 
-    public static void addReplyToBlog(BlogDTO blog, ResultSet rs) throws SQLException{
+    public static void addReplyToBlog(BlogDTO blog, ResultSet rs) throws SQLException {
         BlogReplyDTO reply1 = new BlogReplyDTO();
         reply1.setReply_id(rs.getInt(5));
         reply1.setTitle(rs.getString(6));
@@ -172,10 +172,34 @@ public class BlogRepository {
         user2.setUser_id(rs.getInt(7));
         user2.setUsername(rs.getString(8));
         reply1.setUser(user2);
-        if(blog.getReplyDTOs()==null){
+        if (blog.getReplyDTOs() == null) {
             blog.setReplyDTOs(new ArrayList<BlogReplyDTO>());
         }
         blog.addReply(reply1);
+    }
+
+    public static String deleteResource(String url2, DeleteBlogDTO blogDTO) {
+        try (Connection conn = DriverManager.getConnection(url, username, password)) {
+            int blogId = Integer.parseInt(url2.split("/")[3]);
+            String query = "select * from blogs where blog_id = ? and title like ?";
+            PreparedStatement stmt = conn.prepareStatement(query);
+            stmt.setInt(1, blogId);
+            stmt.setString(2, "%" + blogDTO.getTitle() + "%");
+            ResultSet rs = stmt.executeQuery();
+            if (!rs.isBeforeFirst()) {
+                throw new Exception("blog not found");
+            }
+            rs.close();
+            stmt.close();
+            String query2 = "delete from blogs where blog_id = ?";
+            PreparedStatement stmt2 = conn.prepareStatement(query2);
+            stmt2.setInt(1, blogId);
+            stmt2.execute();
+            stmt2.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "success";
     }
 
 }
