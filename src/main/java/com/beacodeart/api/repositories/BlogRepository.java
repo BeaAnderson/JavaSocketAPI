@@ -13,6 +13,7 @@ import java.util.List;
 import com.beacodeart.api.APIConnection;
 import com.beacodeart.api.dto.BlogDTO;
 import com.beacodeart.api.dto.BlogReplyDTO;
+import com.beacodeart.api.dto.BlogUpdateDTO;
 import com.beacodeart.api.dto.BlogUserDTO;
 import com.beacodeart.api.dto.DeleteBlogDTO;
 import com.beacodeart.api.models.Blog;
@@ -77,17 +78,46 @@ public class BlogRepository {
                 return blogs;
             } else if (spliturl.length == 4) {
 
-                String query = "select * from blogs where " + spliturl[2] + "= ?";
+                String query = getSpecific();
                 PreparedStatement stmt = conn.prepareStatement(query);
-                stmt.setString(1, spliturl[3]);
+                stmt.setInt(1, Integer.parseInt(spliturl[3]));
+                System.out.println(stmt);
                 ResultSet rs = stmt.executeQuery();
                 List<String> blogs = new ArrayList<>();
+                BlogDTO blog1 = new BlogDTO();
+                // check this may need reset at every new blog
+                HashSet<Integer> blogusers = new HashSet<>();
 
                 while (rs.next()) {
-                    Blog blog = new Blog();
-                    blog.setBlog_id(rs.getInt(1));
-                    blog.setTitle(rs.getString(2));
-                    String blogAsString = objectMapper.writeValueAsString(blog);
+                    if (rs.getInt(1) == blog1.getBlog_id()) {
+
+                        if (rs.getInt(3) != 0) {
+                            addUserToBlog(blog1, rs, blogusers);
+                        }
+                        if (rs.getInt(5) != 0) {
+                            addReplyToBlog(blog1, rs);
+                        }
+                    } else {
+                        if (blog1 != null && blog1.getBlog_id() != 0) {
+                            String blogAsString = objectMapper.writeValueAsString(blog1);
+                            blogs.add(blogAsString);
+                            blog1 = new BlogDTO();
+                        }
+
+                        blog1.setBlog_id(rs.getInt(1));
+                        blog1.setTitle(rs.getString(2));
+
+                        if (rs.getInt(3) != 0) {
+                            addUserToBlog(blog1, rs, blogusers);
+                        }
+                        if (rs.getInt(5) != 0) {
+                            addReplyToBlog(blog1, rs);
+                        }
+                    }
+                }
+
+                if (blog1 != null) {
+                    String blogAsString = objectMapper.writeValueAsString(blog1);
                     blogs.add(blogAsString);
                 }
 
@@ -155,6 +185,31 @@ public class BlogRepository {
                        """;
     }
 
+    private static String getSpecific() {
+        return """
+                   SELECT b.blog_id,
+                   b.title,
+                   u.user_id,
+                   u.username,
+                   r.reply_id,
+                   r.title,
+                   v.user_id,
+                   v.username
+                FROM blogs b
+                left join users u
+                on b.user_id = u.user_id
+                left join replies r
+                on b.blog_id = r.blog_id
+                left join (
+                   select user_id,
+                   username
+                   from users
+                ) v
+                on r.user_id = v.user_id
+                where b.blog_id = ?;
+                """;
+    }
+
     public static void addUserToBlog(BlogDTO blog, ResultSet rs, HashSet<Integer> set) throws SQLException {
         int userId = rs.getInt(3);
         set.add(userId);
@@ -200,6 +255,25 @@ public class BlogRepository {
             e.printStackTrace();
         }
         return "success";
+    }
+
+    public static String putResource(String url2, BlogUpdateDTO blogDto) {
+        try (Connection conn = DriverManager.getConnection(url, username, password)) {
+            int blogId = Integer.parseInt(url2.split("/")[3]);
+            String query = "update blogs set title = ? where blog_id = ?";
+            if (blogDto.getTitle() == null) {
+                throw new Exception("title can'tt be null");
+            }
+            PreparedStatement stmt = conn.prepareStatement(query);
+            stmt.setString(1, blogDto.getTitle());
+            stmt.setInt(2, blogId);
+            stmt.executeUpdate();
+            stmt.close();
+            return "string";
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
 }

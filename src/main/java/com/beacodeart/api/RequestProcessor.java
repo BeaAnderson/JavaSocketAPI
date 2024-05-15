@@ -5,10 +5,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.beacodeart.api.dto.BlogDTO;
+import com.beacodeart.api.dto.BlogUpdateDTO;
 import com.beacodeart.api.dto.DeleteBlogDTO;
 import com.beacodeart.api.dto.DeleteReplyDTO;
 import com.beacodeart.api.dto.DeleteUserDTO;
 import com.beacodeart.api.dto.ReplyDTO;
+import com.beacodeart.api.dto.ReplyUpdateDTO;
+import com.beacodeart.api.dto.UserUpdateDTO;
 import com.beacodeart.api.models.User;
 import com.beacodeart.api.repositories.BlogRepository;
 import com.beacodeart.api.repositories.UserRepository;
@@ -159,7 +162,8 @@ public class RequestProcessor implements Request.Visitor<byte[]> {
 
     @Override
     public byte[] visitPutRequest(String url, String body) {
-        switch (url.substring(1)) {
+        System.out.println("visit put");
+        switch (url.split("/")[1]) {
             case "users":
                 putUser(url, body);
                 break;
@@ -177,14 +181,32 @@ public class RequestProcessor implements Request.Visitor<byte[]> {
     }
 
     private String putReply(String url, String body) {
+        try {
+            ReplyUpdateDTO replyDto = mapper.readValue(body, ReplyUpdateDTO.class);
+            return ReplyRepository.putResource(url, replyDto);
+        } catch (Exception e) {
+            // TODO: handle exception
+        }
         return null;
     }
 
     private String putBlog(String url, String body) {
+        try {
+            BlogUpdateDTO blogDto = mapper.readValue(body, BlogUpdateDTO.class);
+            return BlogRepository.putResource(url, blogDto);
+        } catch (Exception e) {
+            // TODO: handle exception
+        }
         return null;
     }
 
     private String putUser(String url, String body) {
+        try {
+            UserUpdateDTO user1 = mapper.readValue(body, UserUpdateDTO.class);
+            return UserRepository.putResource(url, user1);
+        } catch (Exception e) {
+            // TODO: handle exception
+        }
         return null;
     }
 

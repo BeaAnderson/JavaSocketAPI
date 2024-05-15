@@ -15,6 +15,7 @@ import com.beacodeart.api.dto.DeleteUserDTO;
 import com.beacodeart.api.dto.UserBlogDTO;
 import com.beacodeart.api.dto.UserDTO;
 import com.beacodeart.api.dto.UserReplyDTO;
+import com.beacodeart.api.dto.UserUpdateDTO;
 import com.beacodeart.api.models.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -91,19 +92,54 @@ public class UserRepository {
 
                 // if the split url is 4 we are dealing with a request that looks like
                 // /users/param/{value}
-            } else if (spliturl.length == 4) {
 
-                query = "select * from users where " + spliturl[2] + " = ?";
+            } else if (spliturl.length == 4) {
+                // TODO fix
+                query = getSpecific();
                 PreparedStatement stmt = conn.prepareStatement(query);
-                stmt.setString(1, spliturl[3]);
-                System.out.println(stmt);
+                stmt.setInt(1, Integer.parseInt(spliturl[3]));
                 ResultSet rs = stmt.executeQuery();
                 List<String> users = new ArrayList<>();
+                UserDTO user1 = new UserDTO();
+                HashSet<Integer> userBlogs = new HashSet<>();
 
                 while (rs.next()) {
-                    User user1 = new User();
-                    user1.setUser_id(rs.getInt(1));
-                    user1.setUsername(rs.getString(2));
+                    if (rs.getInt(1) == user1.getId()) {
+
+                        int optBlogId = rs.getInt(4);
+
+                        if (optBlogId != 0 && !userBlogs.contains(optBlogId)) {
+                            addBlogToUser(user1, rs, userBlogs, optBlogId);
+                        }
+                        if (rs.getInt(6) != 0) {
+                            addReplyToUser(user1, rs);
+                        }
+
+                    } else {
+
+                        if (user1 != null && user1.getId() != 0) {
+                            String userAsString = objectMapper.writeValueAsString(user1);
+                            users.add(userAsString);
+                            user1 = new UserDTO();
+                        }
+
+                        user1.setId(rs.getInt(1));
+                        user1.setUsername(rs.getString(2));
+                        user1.setPassword(rs.getString(3));
+
+                        int optBlogId = rs.getInt(4);
+
+                        if (optBlogId != 0) {
+                            addBlogToUser(user1, rs, userBlogs, optBlogId);
+                        }
+                        if (rs.getInt(6) != 0) {
+                            addReplyToUser(user1, rs);
+                        }
+
+                    }
+                }
+
+                if (user1 != null) {
                     String userAsString = objectMapper.writeValueAsString(user1);
                     users.add(userAsString);
                 }
@@ -160,6 +196,32 @@ public class UserRepository {
                 """;
     }
 
+    private static String getSpecific() {
+
+        return """
+                 select u.user_id,
+                 u.username,
+                 u.password,
+                 b.blog_id,
+                 b.title,
+                 r.reply_id,
+                 r.title as 'reply_title',
+                r.blog_id as 'reply_blog',
+                 v.title as 'reply_blog_title'
+                from users u
+                left join blogs b
+                 on u.user_id = b.user_id
+                 left join replies r
+                on u.user_id = r.user_id
+                 left join (
+                 select title, blog_id
+                 from blogs
+                 ) v
+                 on r.blog_id = v.blog_id
+                 where u.user_id = ?
+                """;
+    }
+
     private static void addBlogToUser(UserDTO user, ResultSet rs, HashSet<Integer> set, int blogId)
             throws SQLException {
         set.add(blogId);
@@ -211,6 +273,49 @@ public class UserRepository {
         return null;
 
         // delete from users where username = 'testUserPass' and user_id = 6;
+    }
+
+    public static String putResource(String url2, UserUpdateDTO user1) {
+        try (Connection conn = DriverManager.getConnection(url, username, password)) {
+            int userId = Integer.parseInt(url2.split("/")[3]);
+            if (user1.getUsername() == null && user1.getPassword() == null) {
+                throw new Exception("user not null");
+            }
+            if (user1.getUsername() != null && user1.getPassword() != null) {
+                String query = "update users set username = ?, password = ? where user_id = ?";
+                PreparedStatement stmt = conn.prepareStatement(query);
+                stmt.setString(1, user1.getUsername());
+                stmt.setString(2, user1.getPassword());
+                stmt.setInt(3, userId);
+                System.out.println(stmt);
+                stmt.executeUpdate();
+                stmt.close();
+                return "string";
+            }
+            if (user1.getUsername() != null) {
+                System.out.println("updating username");
+                String query2 = "update users set username = ? where user_id = ?";
+                PreparedStatement stmt = conn.prepareStatement(query2);
+                stmt.setString(1, user1.getUsername());
+                stmt.setInt(2, userId);
+                stmt.executeUpdate();
+                stmt.close();
+                return "string";
+            }
+            if (user1.getPassword() != null) {
+                System.out.println("updating password");
+                String query3 = "update users set password = ? where user_id = ?";
+                PreparedStatement stmt = conn.prepareStatement(query3);
+                stmt.setString(1, user1.getPassword());
+                stmt.setInt(2, userId);
+                stmt.executeUpdate();
+                stmt.close();
+                return "string";
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
 }

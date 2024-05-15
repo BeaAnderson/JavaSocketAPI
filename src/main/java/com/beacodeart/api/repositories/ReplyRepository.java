@@ -14,6 +14,7 @@ import com.beacodeart.api.APIConnection;
 import com.beacodeart.api.dto.DeleteReplyDTO;
 import com.beacodeart.api.dto.ReplyBlogDTO;
 import com.beacodeart.api.dto.ReplyDTO;
+import com.beacodeart.api.dto.ReplyUpdateDTO;
 import com.beacodeart.api.dto.ReplyUserDTO;
 import com.beacodeart.api.models.Reply;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -71,23 +72,46 @@ public class ReplyRepository {
                 return replies;
 
             } else if (spliturl.length == 4) {
-                String query = "select * from replies where " + spliturl[2] + " = ?";
+                String query = getSpecificQuery();
                 PreparedStatement stmt = conn.prepareStatement(query);
                 stmt.setString(1, spliturl[3]);
                 ResultSet rs = stmt.executeQuery();
                 List<String> replies = new ArrayList<>();
+                ReplyDTO reply1 = new ReplyDTO();
+                // HashSet<Integer> replyusers = new HashSet<>();
 
+                // TODO simplify, doesn't need to handle many to one
                 while (rs.next()) {
-                    Reply reply = new Reply();
-                    reply.setReply_id(rs.getInt(1));
-                    reply.setTitle(rs.getString(2));
-                    String replyAsString = objectMapper.writeValueAsString(reply);
+                    if (rs.getInt(1) == reply1.getReply_id()) {
+                        if (rs.getInt(3) != 0) {
+                            addUserToReply(reply1, rs);
+                        }
+                        if (rs.getInt(5) != 0) {
+                            addBlogToReply(reply1, rs);
+                        }
+                    } else {
+                        if (reply1 != null && reply1.getReply_id() != 0) {
+                            String replyAsString = objectMapper.writeValueAsString(reply1);
+                            replies.add(replyAsString);
+                            reply1 = new ReplyDTO();
+                        }
+                        reply1.setReply_id(rs.getInt(1));
+                        reply1.setTitle(rs.getString(2));
+
+                        if (rs.getInt(3) != 0) {
+                            addUserToReply(reply1, rs);
+                        }
+                        if (rs.getInt(5) != 0) {
+                            addBlogToReply(reply1, rs);
+                        }
+                    }
+                }
+                if (reply1 != null) {
+                    String replyAsString = objectMapper.writeValueAsString(reply1);
                     replies.add(replyAsString);
                 }
-
                 rs.close();
                 stmt.close();
-
                 return replies;
             }
         } catch (Exception e) {
@@ -196,5 +220,47 @@ public class ReplyRepository {
                 from users) v
                 on b.user_id = v.user_id
                     """;
+    }
+
+    private static String getSpecificQuery() {
+        return """
+                SELECT r.reply_id,
+                r.title,
+                u.user_id,
+                u.username,
+                b.blog_id,
+                b.title,
+                v.user_id,
+                v.username
+                from replies r
+                left join users u
+                on r.user_id = u.user_id
+                left join blogs b
+                on r.blog_id = b.blog_id
+                left join (select user_id,
+                username
+                from users) v
+                on b.user_id = v.user_id
+                where r.reply_id = ?
+                    """;
+    }
+
+    public static String putResource(String url2, ReplyUpdateDTO replyDto) {
+        try (Connection conn = DriverManager.getConnection(url, username, password)) {
+            int replyId = Integer.parseInt(url2.split("/")[3]);
+            String query = "update replies set title = ? where reply_id = ?";
+            if (replyDto.getTitle() == null) {
+                throw new Exception("title cannot be null");
+            }
+            PreparedStatement stmt = conn.prepareStatement(query);
+            stmt.setString(1, replyDto.getTitle());
+            stmt.setInt(2, replyId);
+            stmt.executeUpdate();
+            stmt.close();
+            return "string";
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }
