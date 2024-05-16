@@ -111,7 +111,6 @@ public class RequestProcessor implements Request.Visitor<byte[]> {
     @Override
     public byte[] visitPostRequest(String url, String body) {
         String creationString = "HTTP/1.1 201 CREATED\r\nContent-Location: ";
-        String response;
         String key;
         HashMap<String, String> hashResponse;
         StringBuilder response3 = new StringBuilder();
@@ -180,27 +179,39 @@ public class RequestProcessor implements Request.Visitor<byte[]> {
 
     @Override
     public byte[] visitPutRequest(String url, String body) {
-        String creationString = "HTTP/1.1 201 CREATED\r\nContent-Location: \r\n\r\n";
-        String response;
+        String creationString = "HTTP/1.1 201 CREATED\r\nContent-Location: ";
+        String key;
+        StringBuilder response3 = new StringBuilder(creationString);
+        HashMap<String, String> hashResponse;
         switch (url.split("/")[1]) {
             case "users":
-                response = putUser(url, body);
-                break;
+                hashResponse = putUser(url, body);
+                key = (String) hashResponse.keySet().toArray()[0];
+                response3.append("/users/user_id/" + key + "\r\n");
+                response3.append("Content-type: application/json \r\n\r\n");
+                response3.append(hashResponse.get(key));
+                return response3.toString().getBytes();
             case "blogs":
-                response = putBlog(url, body);
-                break;
+                hashResponse = putBlog(url, body);
+                key = (String) hashResponse.keySet().toArray()[0];
+                response3.append("/blogs/blog_id/" + key + "\r\n");
+                response3.append("Content-type: application/json \r\n\r\n");
+                response3.append(hashResponse.get(key));
+                return response3.toString().getBytes();
             case "replies":
-                response = putReply(url, body);
-                break;
-
+                hashResponse = putReply(url, body);
+                key = (String) hashResponse.keySet().toArray()[0];
+                response3.append("/replies/reply_id/" + key + "\r\n");
+                response3.append("Content-type: application/json \r\n\r\n");
+                response3.append(hashResponse.get(key));
+                return response3.toString().getBytes();
             default:
-                response = "fail";
                 break;
         }
         return creationString.getBytes();
     }
 
-    private String putReply(String url, String body) {
+    private HashMap<String, String> putReply(String url, String body) {
         try {
             ReplyUpdateDTO replyDto = mapper.readValue(body, ReplyUpdateDTO.class);
             return ReplyRepository.putResource(url, replyDto);
@@ -210,7 +221,7 @@ public class RequestProcessor implements Request.Visitor<byte[]> {
         return null;
     }
 
-    private String putBlog(String url, String body) {
+    private HashMap<String, String> putBlog(String url, String body) {
         try {
             BlogUpdateDTO blogDto = mapper.readValue(body, BlogUpdateDTO.class);
             return BlogRepository.putResource(url, blogDto);
@@ -220,7 +231,7 @@ public class RequestProcessor implements Request.Visitor<byte[]> {
         return null;
     }
 
-    private String putUser(String url, String body) {
+    private HashMap<String, String> putUser(String url, String body) {
         try {
             UserUpdateDTO user1 = mapper.readValue(body, UserUpdateDTO.class);
             return UserRepository.putResource(url, user1);

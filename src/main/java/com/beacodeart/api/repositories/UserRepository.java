@@ -44,6 +44,7 @@ public class UserRepository {
                 UserDTO user1 = new UserDTO();
                 // check this may need reset at every new user
                 HashSet<Integer> userBlogs = new HashSet<>();
+                HashSet<Integer> userReplies = new HashSet<>();
 
                 while (rs.next()) {
                     if (rs.getInt(1) == user1.getId()) {
@@ -53,8 +54,11 @@ public class UserRepository {
                         if (optBlogId != 0 && !userBlogs.contains(optBlogId)) {
                             addBlogToUser(user1, rs, userBlogs, optBlogId);
                         }
-                        if (rs.getInt(6) != 0) {
-                            addReplyToUser(user1, rs);
+
+                        int optReplyId = rs.getInt(6);
+
+                        if (optReplyId != 0 && !userReplies.contains(optReplyId)) {
+                            addReplyToUser(user1, rs, userReplies, optReplyId);
                         }
 
                     } else {
@@ -74,8 +78,11 @@ public class UserRepository {
                         if (optBlogId != 0) {
                             addBlogToUser(user1, rs, userBlogs, optBlogId);
                         }
-                        if (rs.getInt(6) != 0) {
-                            addReplyToUser(user1, rs);
+
+                        int optReplyId = rs.getInt(6);
+
+                        if (optReplyId != 0) {
+                            addReplyToUser(user1, rs, userReplies, optReplyId);
                         }
 
                     }
@@ -103,6 +110,7 @@ public class UserRepository {
                 List<String> users = new ArrayList<>();
                 UserDTO user1 = new UserDTO();
                 HashSet<Integer> userBlogs = new HashSet<>();
+                HashSet<Integer> userReplies = new HashSet<>();
 
                 while (rs.next()) {
                     if (rs.getInt(1) == user1.getId()) {
@@ -112,8 +120,11 @@ public class UserRepository {
                         if (optBlogId != 0 && !userBlogs.contains(optBlogId)) {
                             addBlogToUser(user1, rs, userBlogs, optBlogId);
                         }
-                        if (rs.getInt(6) != 0) {
-                            addReplyToUser(user1, rs);
+
+                        int optReplyId = rs.getInt(6);
+
+                        if (optReplyId != 0 && !userReplies.contains(optReplyId)) {
+                            addReplyToUser(user1, rs, userReplies, optReplyId);
                         }
 
                     } else {
@@ -133,8 +144,11 @@ public class UserRepository {
                         if (optBlogId != 0) {
                             addBlogToUser(user1, rs, userBlogs, optBlogId);
                         }
-                        if (rs.getInt(6) != 0) {
-                            addReplyToUser(user1, rs);
+
+                        int optReplyId = rs.getInt(6);
+
+                        if (optReplyId != 0) {
+                            addReplyToUser(user1, rs, userReplies, optReplyId);
                         }
 
                     }
@@ -237,14 +251,16 @@ public class UserRepository {
         set.add(blogId);
         UserBlogDTO blog1 = new UserBlogDTO();
         blog1.setId(blogId);
-        blog1.setTitle(rs.getString(4));
+        blog1.setTitle(rs.getString(5));
         if (user.getBlogs() == null) {
             user.setBlogs(new ArrayList<UserBlogDTO>());
         }
         user.addBlog(blog1);
     }
 
-    private static void addReplyToUser(UserDTO user1, ResultSet rs) throws SQLException {
+    private static void addReplyToUser(UserDTO user1, ResultSet rs, HashSet<Integer> set, int replyId)
+            throws SQLException {
+        set.add(replyId);
         UserReplyDTO reply1 = new UserReplyDTO();
         reply1.setId(rs.getInt(6));
         reply1.setTitle(rs.getString(7));
@@ -285,7 +301,7 @@ public class UserRepository {
         // delete from users where username = 'testUserPass' and user_id = 6;
     }
 
-    public static String putResource(String url2, UserUpdateDTO user1) {
+    public static HashMap<String, String> putResource(String url2, UserUpdateDTO user1) {
         try (Connection conn = DriverManager.getConnection(url, username, password)) {
             int userId = Integer.parseInt(url2.split("/")[3]);
             if (user1.getUsername() == null && user1.getPassword() == null) {
@@ -300,9 +316,8 @@ public class UserRepository {
                 System.out.println(stmt);
                 stmt.executeUpdate();
                 stmt.close();
-                return "string";
-            }
-            if (user1.getUsername() != null) {
+
+            } else if (user1.getUsername() != null) {
                 System.out.println("updating username");
                 String query2 = "update users set username = ? where user_id = ?";
                 PreparedStatement stmt = conn.prepareStatement(query2);
@@ -310,9 +325,8 @@ public class UserRepository {
                 stmt.setInt(2, userId);
                 stmt.executeUpdate();
                 stmt.close();
-                return "string";
-            }
-            if (user1.getPassword() != null) {
+
+            } else if (user1.getPassword() != null) {
                 System.out.println("updating password");
                 String query3 = "update users set password = ? where user_id = ?";
                 PreparedStatement stmt = conn.prepareStatement(query3);
@@ -320,8 +334,13 @@ public class UserRepository {
                 stmt.setInt(2, userId);
                 stmt.executeUpdate();
                 stmt.close();
-                return "string";
             }
+            String uri = "/users/user_id/" + userId;
+            String object = getResource(uri).get(0);
+            HashMap<String, String> returnVal = new HashMap<>();
+            String stringId = "" + userId;
+            returnVal.put(stringId, object);
+            return returnVal;
         } catch (Exception e) {
             e.printStackTrace();
         }

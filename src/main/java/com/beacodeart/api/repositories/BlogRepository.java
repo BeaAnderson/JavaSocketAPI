@@ -266,7 +266,7 @@ public class BlogRepository {
         return "success";
     }
 
-    public static String putResource(String url2, BlogUpdateDTO blogDto) {
+    public static HashMap<String, String> putResource(String url2, BlogUpdateDTO blogDto) {
         try (Connection conn = DriverManager.getConnection(url, username, password)) {
             int blogId = Integer.parseInt(url2.split("/")[3]);
             String query = "update blogs set title = ? where blog_id = ?";
@@ -278,7 +278,12 @@ public class BlogRepository {
             stmt.setInt(2, blogId);
             stmt.executeUpdate();
             stmt.close();
-            return "string";
+            String uri = "/blogs/blog_id/" + blogId;
+            String object = getResource(uri).get(0);
+            HashMap<String, String> returnVal = new HashMap<>();
+            String stringId = "" + blogId;
+            returnVal.put(stringId, object);
+            return returnVal;
         } catch (Exception e) {
             e.printStackTrace();
         }

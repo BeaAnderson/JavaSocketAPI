@@ -254,7 +254,7 @@ public class ReplyRepository {
                     """;
     }
 
-    public static String putResource(String url2, ReplyUpdateDTO replyDto) {
+    public static HashMap<String, String> putResource(String url2, ReplyUpdateDTO replyDto) {
         try (Connection conn = DriverManager.getConnection(url, username, password)) {
             int replyId = Integer.parseInt(url2.split("/")[3]);
             String query = "update replies set title = ? where reply_id = ?";
@@ -266,7 +266,12 @@ public class ReplyRepository {
             stmt.setInt(2, replyId);
             stmt.executeUpdate();
             stmt.close();
-            return "string";
+            String uri = "/replies/reply_id/" + replyId;
+            String object = getResource(uri).get(0);
+            HashMap<String, String> returnVal = new HashMap<>();
+            String stringId = ""+replyId;
+            returnVal.put(stringId, object);
+            return returnVal;
         } catch (Exception e) {
             e.printStackTrace();
         }
