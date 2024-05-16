@@ -5,7 +5,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
-
+import java.util.HashMap;
 import java.util.List;
 
 import java.sql.Statement;
@@ -16,7 +16,6 @@ import com.beacodeart.api.dto.ReplyBlogDTO;
 import com.beacodeart.api.dto.ReplyDTO;
 import com.beacodeart.api.dto.ReplyUpdateDTO;
 import com.beacodeart.api.dto.ReplyUserDTO;
-import com.beacodeart.api.models.Reply;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class ReplyRepository {
@@ -121,7 +120,7 @@ public class ReplyRepository {
         return null;
     }
 
-    public static String postResource(ReplyDTO reply) {
+    public static HashMap<String, String> postResource(ReplyDTO reply) {
         try (Connection conn = DriverManager.getConnection(url, username, password)) {
             // check user and blog exist
             String check1 = "SELECT * FROM users WHERE user_id = ?";
@@ -144,17 +143,27 @@ public class ReplyRepository {
             rs2.close();
             stmt2.close();
 
+
             String query = "INSERT INTO replies ( title, user_id, blog_id ) VALUES ( ?, ?, ? )";
-            PreparedStatement stmt3 = conn.prepareStatement(query);
+            PreparedStatement stmt3 = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
             stmt3.setString(1, reply.getTitle());
             stmt3.setInt(2, reply.getUser().getUser_id());
             stmt3.setInt(3, reply.getBlog().getBlog_id());
             stmt3.executeUpdate();
+            ResultSet rs3 = stmt3.getGeneratedKeys();
+            rs3.next();
+            String id = rs3.getString(1);
+            String uri = "/replies/reply_id/" + id;
+            String object = getResource(uri).get(0);
+            HashMap<String, String> returnVal = new HashMap<>();
+            returnVal.put(id, object);
+            rs3.close();
             stmt3.close();
+            return returnVal;
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return "success";
+        return null;
     }
 
     public static String deleteResource(String url1, DeleteReplyDTO replyDTO) {

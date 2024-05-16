@@ -21,6 +21,8 @@ public class Api {
 	public static void main(String[] args) throws IOException {
 		// start the server
 		int port = 8080;
+
+		@SuppressWarnings("resource")
 		ServerSocket serverSocket = new ServerSocket(port);
 
 		System.out.println("Server started on port " + port);

@@ -7,6 +7,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
@@ -156,20 +157,29 @@ public class UserRepository {
         return null;
     }
 
-    public static String postResource(User user) {
+    public static HashMap<String, String> postResource(User user) {
 
         try (Connection conn = DriverManager.getConnection(url, username, password)) {
+            HashMap<String, String> returnVal = new HashMap<>();
             String query = "INSERT INTO users ( username, password ) VALUES ( ?, ? )";
-            PreparedStatement stmt = conn.prepareStatement(query);
+            PreparedStatement stmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
             stmt.setString(1, user.getUsername());
             stmt.setString(2, user.getPassword());
             stmt.executeUpdate();
+            ResultSet rs = stmt.getGeneratedKeys();
+            rs.next();
+            String id = rs.getString(1);
+            String uri = "/users/user_id/" + id;
+            String object = getResource(uri).get(0);
+            returnVal.put(id, object);
+            rs.close();
+            stmt.close();
+            return returnVal;
         } catch (Exception e) {
             e.printStackTrace();
         }
-        ;
 
-        return "success";
+        return null;
     }
 
     private static String getAllQuery() {

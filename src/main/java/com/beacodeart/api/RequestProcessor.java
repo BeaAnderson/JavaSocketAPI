@@ -2,6 +2,7 @@ package com.beacodeart.api;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import com.beacodeart.api.dto.BlogDTO;
@@ -19,7 +20,6 @@ import com.beacodeart.api.repositories.ReplyRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-//impliment singleton for repositoriers?
 public class RequestProcessor implements Request.Visitor<byte[]> {
 
     ObjectMapper mapper;
@@ -110,24 +110,42 @@ public class RequestProcessor implements Request.Visitor<byte[]> {
 
     @Override
     public byte[] visitPostRequest(String url, String body) {
+        String creationString = "HTTP/1.1 201 CREATED\r\nContent-Location: ";
+        String response;
+        String key;
+        HashMap<String, String> hashResponse;
+        StringBuilder response3 = new StringBuilder();
+        response3.append(creationString);
         switch (url.substring(1)) {
             case "users":
-                postUser(body);
-                break;
+                hashResponse = postUser(body);
+                key = (String) hashResponse.keySet().toArray()[0];
+                response3.append("/users/user_id/" + key + "\r\n");
+                response3.append("Content-type: application/json \r\n\r\n");
+                response3.append(hashResponse.get(key));
+                return response3.toString().getBytes();
             case "blogs":
-                postBlog(body);
-                break;
+                hashResponse = postBlog(body);
+                key = (String) hashResponse.keySet().toArray()[0];
+                response3.append("/blogs/blog_id/" + key + "\r\n");
+                response3.append("Content-type: application/json \r\n\r\n");
+                response3.append(hashResponse.get(key));
+                return response3.toString().getBytes();
             case "replies":
-                postReply(body);
-                break;
+                hashResponse = postReply(body);
+                key = (String) hashResponse.keySet().toArray()[0];
+                response3.append("/replies/reply_id/" + key + "\r\n");
+                response3.append("Content-type: application/json \r\n\r\n");
+                response3.append(hashResponse.get(key));
+                return response3.toString().getBytes();
             default:
                 break;
         }
 
-        return "HTTP/1.1 200 OK\r\n\r\nHello".getBytes();
+        return creationString.getBytes();
     }
 
-    private String postReply(String body) {
+    private HashMap<String, String> postReply(String body) {
         try {
             ReplyDTO reply1 = mapper.readValue(body, ReplyDTO.class);
             return ReplyRepository.postResource(reply1);
@@ -137,7 +155,7 @@ public class RequestProcessor implements Request.Visitor<byte[]> {
         return null;
     }
 
-    private String postBlog(String body) {
+    private HashMap<String, String> postBlog(String body) {
         try {
             BlogDTO blog1 = mapper.readValue(body, BlogDTO.class);
             return BlogRepository.postResource(blog1);
@@ -148,7 +166,7 @@ public class RequestProcessor implements Request.Visitor<byte[]> {
         return null;
     }
 
-    private String postUser(String body) {
+    private HashMap<String, String> postUser(String body) {
         try {
             User user1 = mapper.readValue(body, User.class);
             return UserRepository.postResource(user1);
@@ -162,22 +180,24 @@ public class RequestProcessor implements Request.Visitor<byte[]> {
 
     @Override
     public byte[] visitPutRequest(String url, String body) {
-        System.out.println("visit put");
+        String creationString = "HTTP/1.1 201 CREATED\r\nContent-Location: \r\n\r\n";
+        String response;
         switch (url.split("/")[1]) {
             case "users":
-                putUser(url, body);
+                response = putUser(url, body);
                 break;
             case "blogs":
-                putBlog(url, body);
+                response = putBlog(url, body);
                 break;
             case "replies":
-                putReply(url, body);
+                response = putReply(url, body);
                 break;
 
             default:
+                response = "fail";
                 break;
         }
-        return "HTTP/1.1 200 OK\r\n\r\nHello".getBytes();
+        return creationString.getBytes();
     }
 
     private String putReply(String url, String body) {
@@ -214,7 +234,6 @@ public class RequestProcessor implements Request.Visitor<byte[]> {
     public byte[] visitDeleteRequest(String url, String body) {
         switch (url.split("/")[1]) {
             case "users":
-                System.out.println("delet users");
                 deleteUser(url, body);
                 break;
             case "blogs":

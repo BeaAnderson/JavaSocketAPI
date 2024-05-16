@@ -7,6 +7,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
@@ -16,7 +17,6 @@ import com.beacodeart.api.dto.BlogReplyDTO;
 import com.beacodeart.api.dto.BlogUpdateDTO;
 import com.beacodeart.api.dto.BlogUserDTO;
 import com.beacodeart.api.dto.DeleteBlogDTO;
-import com.beacodeart.api.models.Blog;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class BlogRepository {
@@ -133,9 +133,10 @@ public class BlogRepository {
         return null;
     }
 
-    public static String postResource(BlogDTO blog) {
+    public static HashMap<String, String> postResource(BlogDTO blog) {
         try (Connection conn = DriverManager.getConnection(url, username, password)) {
             // check user exists
+            HashMap<String, String> returnVal = new HashMap<>();
             String check = "SELECT * FROM users WHERE user_id = ?";
             PreparedStatement stmt = conn.prepareStatement(check);
             stmt.setInt(1, blog.getUserDTO().getUser_id());
@@ -148,17 +149,25 @@ public class BlogRepository {
 
             // add the blog in
             String query = "INSERT INTO blogs ( title, user_id ) VALUES ( ?, ? )";
-            PreparedStatement stmt2 = conn.prepareStatement(query);
+            PreparedStatement stmt2 = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
 
             stmt2.setString(1, blog.getTitle());
             stmt2.setInt(2, blog.getUserDTO().getUser_id());
             stmt2.executeUpdate();
+            ResultSet rs2 = stmt2.getGeneratedKeys();
+            rs2.next();
+            String id = rs2.getString(1);
+            String uri = "/blogs/blog_id/" + id;
+            String object = getResource(uri).get(0);
+            returnVal.put(id, object);
+            rs2.close();
             stmt2.close();
+            return returnVal;
 
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return "success";
+        return null;
     }
 
     private static String getAllQuery() {
