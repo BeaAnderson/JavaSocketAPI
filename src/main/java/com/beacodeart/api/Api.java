@@ -30,7 +30,7 @@ public class Api {
 		// keep the server running
 		while (true) {
 
-			// comment
+			// creates a new socket that will continually listen for incoming request
 			Socket client = serverSocket.accept();
 			client.setSoTimeout(0);
 
@@ -42,14 +42,19 @@ public class Api {
 					RequestProcessor requestProcessor = new RequestProcessor(
 							new ObjectMapper());
 
+					// httprequest stores the full request in one continuous string
 					String httpRequest = read(inputStream);
 
+					//because the parse request method takes an array of lines we need to create that array here
 					List<String> lines = Arrays.asList(httpRequest.split("(?m)^\\s*$"));
 
+					//returns an object that will implement the request interface
 					Request parsedRequest = parseRequest(lines);
 
+					//use visitor pattern to determine what should happen based on the request type
 					outputStream.write(parsedRequest.accept(requestProcessor));
 
+					//send our output
 					outputStream.flush();
 
 				} catch (IOException ex) {
@@ -66,6 +71,7 @@ public class Api {
 		}
 	}
 
+	// takes our input stream and returns the full input stream in string form
 	static String read(InputStream input) throws IOException {
 		StringBuilder result = new StringBuilder();
 
@@ -76,6 +82,7 @@ public class Api {
 		return result.toString();
 	}
 
+	//takes the individual lines of the http request and returns an object of type request
 	static Request parseRequest(List<String> data) {
 		String method = null;
 		String url = null;
@@ -100,6 +107,7 @@ public class Api {
 			headers.put(key, value);
 		}
 
+		//the specific request to be returned is defined here
 		switch (method) {
 			case "GET":
 				return new GetRequest(url, headers);
@@ -108,7 +116,6 @@ public class Api {
 			case "PUT":
 				return new PutRequest(url, headers, body);
 			case "DELETE":
-				System.out.println("del req");
 				return new DeleteRequest(url, headers, body);
 			default:
 				break;
