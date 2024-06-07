@@ -46,6 +46,8 @@ public class Api {
 					String httpRequest = read(inputStream);
 
 					//because the parse request method takes an array of lines we need to create that array here
+					//splits on a blank line because of http specification
+					//as a result returns header and body
 					List<String> lines = Arrays.asList(httpRequest.split("(?m)^\\s*$"));
 
 					//returns an object that will implement the request interface
@@ -89,17 +91,23 @@ public class Api {
 		Map<String, String> headers = new HashMap<String, String>();
 		String body = null;
 
+		//if the request array is 2 items long the 2nd item index pos 1 is the body
+		//store this as one given rest specification/ we take in json
 		if (data.size() > 1) {
 			body = data.get(1);
 		}
 
+		//we need trto further process the headers of the request
+		//we break the request into individual lines based on newline char regex
 		String unparsedHeaders = data.get(0);
 		List<String> headerLines = Arrays.asList(unparsedHeaders.split("\\r?\\n|\\r"));
 
+		//line 1 tells us the type of request and the url of the rtequested resource
 		String line1 = headerLines.get(0);
 		method = line1.split("\\s+")[0].trim();
 		url = line1.split("\\s+")[1].trim();
 
+		//all other lines can be split and stored in a dictionary
 		for (int i = 1; i < headerLines.size(); i++) {
 			String line = headerLines.get(i);
 			String key = line.split(":")[0];
